@@ -12,3 +12,14 @@ class ContaCorrenteSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContaCorrente
         exclude = ['created', 'modified']
+
+
+class ConsultarContaSerializer(serializers.Serializer):
+    agencia = serializers.CharField(max_length=6)
+    num_conta = serializers.CharField(max_length=6)
+
+
+class ConsultarContaOutputSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContaCorrente
+        fields = '__all__'
