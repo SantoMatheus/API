@@ -14,3 +14,10 @@ def gerar_num_conta():
     ultimo_num_conta = ultima_conta_criada.num_conta
     num_conta = int(ultimo_num_conta) + 1
     return str(num_conta)
+
+
+def consultar_conta(agencia, num_conta):
+    info_conta = ContaCorrente.objects.get(agencia=agencia, num_conta=num_conta)
+    return info_conta
+
+
