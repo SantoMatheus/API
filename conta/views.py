@@ -1,10 +1,11 @@
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from conta.serializers import DepositoSerializer
 
 from conta.serializers import CriarContaSerializer, ContaCorrenteSerializer, ConsultarContaSerializer, \
     ConsultarContaOutputSerializer
-from conta.service import criar_conta, consultar_conta
+from conta.service import criar_conta, consultar_conta, DepositoConta
 
 
 class CriarContaView(APIView):
@@ -34,6 +35,20 @@ class ConsultarContaView(APIView):
 
         return Response(data=output.data, status='200')
 
+
+class DepositoContaView(APIView):
+    def patch(self, request, saldo):
+        data_dict = {'saldo': saldo}
+        serializer = DepositoSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        body = serializer.validated_data
+        saldo = body['saldo']
+        novo_saldo = DepositoConta(saldo=saldo)
+
+        output = ConsultarContaOutputSerializer(instance=saldo)
+
+        return Response(data=output.data, status='201')
 
 
 
