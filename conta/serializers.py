@@ -23,8 +23,3 @@ class ConsultarContaOutputSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContaCorrente
         fields = '__all__'
-
-
-class DepositoSerializer(serializers.ModelSerializer):
-   saldo = serializers.FloatField
-
