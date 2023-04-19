@@ -20,7 +20,7 @@ def consultar_conta(agencia, num_conta):
     info_conta = ContaCorrente.objects.get(agencia=agencia, num_conta=num_conta)
     return info_conta
 
-def DepositoConta(self, saldo):
-       saldo_atual = float(ContaCorrente.objects.get(saldo=saldo))
-       novo_saldo = float(ContaCorrente.objects.update(saldo_atual))
+def DepositoConta(saldo):
+       saldo_atual = ContaCorrente.objects.get(saldo=saldo)
+       novo_saldo = ContaCorrente.objects.update(saldo_atual)
        return float(novo_saldo)
