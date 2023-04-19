@@ -33,8 +33,3 @@ class ConsultarContaView(APIView):
         output = ConsultarContaOutputSerializer(instance=conta)
 
         return Response(data=output.data, status='200')
-
-
-
-
-
