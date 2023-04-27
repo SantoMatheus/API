@@ -4,8 +4,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from conta.serializers import CriarContaSerializer, ContaCorrenteSerializer, ConsultarContaSerializer, \
-    ConsultarContaOutputSerializer, DepositoInputSerializer
-from conta.service import criar_conta, consultar_conta, aumentar_saldo
+    ConsultarContaOutputSerializer, DepositoInputSerializer, SaqueInputSerializer
+from conta.service import criar_conta, consultar_conta, aumentar_saldo, diminuir_saldo
 
 
 class CriarContaView(APIView):
@@ -43,3 +43,14 @@ class DepositoView(APIView):
 
         return Response(data=output.data, status='202')
 
+class SaqueView(APIView):
+    def patch(self, request: Request, agencia: str, num_conta: str):
+        serializer = SaqueInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        valor_saque = serializer.validated_data['valor_saque']
+
+        saldo_atualizado = diminuir_saldo(agencia=agencia, num_conta=num_conta, valor_saque=valor_saque)
+        output = ConsultarContaOutputSerializer(instance=saldo_atualizado)
+
+        return Response(data=output.data, status='202')

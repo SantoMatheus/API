@@ -27,3 +27,10 @@ def aumentar_saldo(agencia, num_conta, valor_deposito):
     conta_destino.save()
 
     return conta_destino
+
+def diminuir_saldo(agencia, num_conta, valor_saque):
+    conta_origem = consultar_conta(agencia=agencia, num_conta=num_conta)
+    conta_origem.saldo -= valor_saque
+    conta_origem.save()
+
+    return conta_origem
