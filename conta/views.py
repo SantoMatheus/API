@@ -50,7 +50,7 @@ class SaqueView(APIView):
 
         valor_saque = serializer.validated_data['valor_saque']
 
-        saldo_atualizado = diminuir_saldo(agencia=agencia, num_conta=num_conta, valor_saque=valor_saque)
-        output = ConsultarContaOutputSerializer(instance=saldo_atualizado)
+        conta_atualizada = diminuir_saldo(agencia=agencia, num_conta=num_conta, valor_saque=valor_saque)
+        output = ConsultarContaOutputSerializer(instance=conta_atualizada)
 
         return Response(data=output.data, status='202')
