@@ -17,20 +17,27 @@ def gerar_num_conta() -> str:
 
 
 def consultar_conta(agencia, num_conta) -> ContaCorrente:
-    info_conta = ContaCorrente.objects.get(agencia=agencia, num_conta=num_conta)
-    return info_conta
+    conta_corrente = ContaCorrente.objects.get(agencia=agencia, num_conta=num_conta)
+    return conta_corrente
 
 
-def aumentar_saldo(agencia, num_conta, valor_deposito):
-    conta_destino = consultar_conta(agencia=agencia, num_conta=num_conta)
-    conta_destino.saldo += valor_deposito
-    conta_destino.save()
+def aumentar_saldo(agencia, num_conta, valor_deposito) -> ContaCorrente:
+    conta_corrente = consultar_conta(agencia=agencia, num_conta=num_conta)
+    conta_corrente.saldo += valor_deposito
+    conta_corrente.save()
 
-    return conta_destino
+    return conta_corrente
 
-def diminuir_saldo(agencia, num_conta, valor_saque):
-    conta_origem = consultar_conta(agencia=agencia, num_conta=num_conta)
-    conta_origem.saldo -= valor_saque
-    conta_origem.save()
 
-    return conta_origem
+def diminuir_saldo(agencia, num_conta, valor_saque) -> ContaCorrente:
+    conta_corrente = consultar_conta(agencia=agencia, num_conta=num_conta)
+    conta_corrente.saldo -= valor_saque
+    conta_corrente.save()
+
+    return conta_corrente
+
+
+def transferir_saldo(agencia_origem, conta_origem, valor, agencia_destino, conta_destino):
+    conta_corrente = diminuir_saldo(agencia=agencia_origem, num_conta=conta_origem, valor_saque=valor)
+    aumentar_saldo(agencia=agencia_destino, num_conta=conta_destino, valor_deposito=valor)
+    return conta_corrente

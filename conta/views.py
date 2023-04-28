@@ -4,8 +4,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from conta.serializers import CriarContaSerializer, ContaCorrenteSerializer, ConsultarContaSerializer, \
-    ConsultarContaOutputSerializer, DepositoInputSerializer, SaqueInputSerializer
-from conta.service import criar_conta, consultar_conta, aumentar_saldo, diminuir_saldo
+    ConsultarContaOutputSerializer, DepositoInputSerializer, SaqueInputSerializer, TransferenciaInputSerializer
+from conta.service import criar_conta, consultar_conta, aumentar_saldo, diminuir_saldo, transferir_saldo
 
 
 class CriarContaView(APIView):
@@ -31,6 +31,7 @@ class ConsultarContaView(APIView):
 
         return Response(data=output.data, status='200')
 
+
 class DepositoView(APIView):
     def patch(self, request: Request, agencia: str, num_conta: str):
         serializer = DepositoInputSerializer(data=request.data)
@@ -43,6 +44,7 @@ class DepositoView(APIView):
 
         return Response(data=output.data, status='202')
 
+
 class SaqueView(APIView):
     def patch(self, request: Request, agencia: str, num_conta: str):
         serializer = SaqueInputSerializer(data=request.data)
@@ -52,5 +54,28 @@ class SaqueView(APIView):
 
         conta_atualizada = diminuir_saldo(agencia=agencia, num_conta=num_conta, valor_saque=valor_saque)
         output = ConsultarContaOutputSerializer(instance=conta_atualizada)
+
+        return Response(data=output.data, status='202')
+
+
+class TransferenciaView(APIView):
+    def post(self, request: Request):
+        serializer = TransferenciaInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        body = serializer.validated_data
+        agencia_origem = body['agencia_origem']
+        conta_origem = body['conta_origem']
+        agencia_destino = body['agencia_destino']
+        conta_destino = body['conta_destino']
+        valor = body['valor']
+
+        conta_corrente = transferir_saldo(agencia_origem=agencia_origem,
+                                          conta_origem=conta_origem,
+                                          valor=valor,
+                                          agencia_destino=agencia_destino,
+                                          conta_destino=conta_destino)
+
+        output = ConsultarContaOutputSerializer(instance=conta_corrente)
 
         return Response(data=output.data, status='202')
