@@ -32,3 +32,10 @@ class DepositoInputSerializer(serializers.Serializer):
 class SaqueInputSerializer(serializers.Serializer):
     valor_saque = serializers.FloatField(required=True)
 
+
+class TransferenciaInputSerializer(serializers.Serializer):
+    agencia_origem = serializers.CharField(max_length=6)
+    conta_origem = serializers.CharField(max_length=6)
+    agencia_destino = serializers.CharField(max_length=6)
+    conta_destino = serializers.CharField(max_length=6)
+    valor = serializers.FloatField(required=True)
