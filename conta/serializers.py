@@ -28,3 +28,7 @@ class ConsultarContaOutputSerializer(serializers.ModelSerializer):
 class DepositoInputSerializer(serializers.Serializer):
     valor_deposito = serializers.FloatField(required=True)
 
+
+class SaqueInputSerializer(serializers.Serializer):
+    valor_saque = serializers.FloatField(required=True)
+
