@@ -39,3 +39,7 @@ class TransferenciaInputSerializer(serializers.Serializer):
     agencia_destino = serializers.CharField(max_length=6)
     conta_destino = serializers.CharField(max_length=6)
     valor = serializers.FloatField(required=True)
+
+class MulticontaInputSerializer(serializers.Serializer):
+    agencia = serializers.CharField(max_length=6)
+    conta_origem = serializers.CharField(max_length=6)

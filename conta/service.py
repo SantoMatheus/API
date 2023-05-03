@@ -41,3 +41,9 @@ def transferir_saldo(agencia_origem, conta_origem, valor, agencia_destino, conta
     conta_corrente = diminuir_saldo(agencia=agencia_origem, num_conta=conta_origem, valor_saque=valor)
     aumentar_saldo(agencia=agencia_destino, num_conta=conta_destino, valor_deposito=valor)
     return conta_corrente
+
+
+def multiconta(agencia, num_conta):
+    conta_corrente = consultar_conta(agencia=agencia, num_conta=num_conta)
+    nova_conta = criar_conta(nome=conta_corrente.nome, cpf=conta_corrente.cpf)
+    return nova_conta
