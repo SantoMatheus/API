@@ -1,13 +1,12 @@
-from django.shortcuts import render
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from conta.serializers import CriarContaSerializer, ContaCorrenteSerializer, ConsultarContaSerializer, \
-    ConsultarContaOutputSerializer, DepositoInputSerializer, SaqueInputSerializer, TransferenciaInputSerializer, \
-    CriarBoletoInputSerializer, CriarBoletoOutputSerializer
-from conta.service import criar_conta, consultar_conta, aumentar_saldo, diminuir_saldo, transferir_saldo, gerar_boleto
-from conta.models import Boleto, ContaCorrente
+from conta.serializers import CriarContaSerializer, ContaCorrenteSerializer, ConsultarContaOutputSerializer, \
+    DepositoInputSerializer, SaqueInputSerializer, TransferenciaInputSerializer, \
+    CriarBoletoInputSerializer, CriarBoletoOutputSerializer, MulticontaInputSerializer
+from conta.service import criar_conta, consultar_conta, aumentar_saldo, diminuir_saldo, transferir_saldo, multiconta
+from conta.service import gerar_boleto
 
 
 class CriarContaView(APIView):
@@ -83,6 +82,7 @@ class TransferenciaView(APIView):
         return Response(data=output.data, status='202')
 
 
+
 class GerarBoletoView(APIView):
     def post(self, request: Request):
         serializer = CriarBoletoInputSerializer(data=request.data)
@@ -99,3 +99,20 @@ class GerarBoletoView(APIView):
         output = CriarBoletoOutputSerializer(instance=boleto)
 
         return Response(data=output.data, status=201)
+
+
+class MulticontaView(APIView):
+    def post(self, request: Request):
+        serializer = MulticontaInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        body = serializer.validated_data
+        agencia = body['agencia']
+        numero_conta_origem = body['conta_origem']
+
+        conta_corrente = multiconta(agencia=agencia, num_conta=numero_conta_origem)
+
+        output = ConsultarContaOutputSerializer(instance=conta_corrente)
+
+        return Response(data=output.data, status=200)
+

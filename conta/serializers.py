@@ -52,3 +52,9 @@ class CriarBoletoOutputSerializer(serializers.ModelSerializer):
     class Meta:
         model = Boleto
         fields = '__all__'
+
+
+class MulticontaInputSerializer(serializers.Serializer):
+    agencia = serializers.CharField(max_length=6)
+    conta_origem = serializers.CharField(max_length=6)
+

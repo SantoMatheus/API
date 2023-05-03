@@ -36,14 +36,18 @@ def diminuir_saldo(agencia, num_conta, valor_saque) -> ContaCorrente:
 
     return conta_corrente
 
-
 def transferir_saldo(agencia_origem, conta_origem, valor, agencia_destino, conta_destino):
     conta_corrente = diminuir_saldo(agencia=agencia_origem, num_conta=conta_origem, valor_saque=valor)
     aumentar_saldo(agencia=agencia_destino, num_conta=conta_destino, valor_deposito=valor)
     return conta_corrente
 
-
 def gerar_boleto(num_conta, agencia, valor, data_vencimento):
     conta_corrente = consultar_conta(agencia=agencia, num_conta=num_conta)
     boleto = Boleto.objects.create(conta_corrente=conta_corrente, valor=valor, data_vencimento=data_vencimento)
     return boleto
+
+def multiconta(agencia, num_conta):
+    conta_corrente = consultar_conta(agencia=agencia, num_conta=num_conta)
+    nova_conta = criar_conta(nome=conta_corrente.nome, cpf=conta_corrente.cpf)
+    return nova_conta
+
