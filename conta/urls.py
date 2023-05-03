@@ -1,7 +1,7 @@
-
 from django.urls import path
 
-from conta.views import CriarContaView, ConsultarContaView, DepositoView, SaqueView, TransferenciaView, MulticontaView
+from conta.views import (CriarContaView, ConsultarContaView, DepositoView, SaqueView, TransferenciaView,
+                         MulticontaView)
 
 app_name = 'conta'
 
