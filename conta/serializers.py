@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from conta.models import ContaCorrente, Boleto
+from conta.models import ContaCorrente
 
 
 class CriarContaSerializer(serializers.Serializer):
@@ -41,20 +41,6 @@ class TransferenciaInputSerializer(serializers.Serializer):
     valor = serializers.FloatField(required=True)
 
 
-class CriarBoletoInputSerializer(serializers.Serializer):
-    conta_corrente = serializers.CharField(max_length=6)
-    agencia = serializers.CharField(max_length=6)
-    data_vencimento = serializers.DateField()
-    valor = serializers.FloatField(required=True)
-
-
-class CriarBoletoOutputSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Boleto
-        fields = '__all__'
-
-
 class MulticontaInputSerializer(serializers.Serializer):
     agencia = serializers.CharField(max_length=6)
     conta_origem = serializers.CharField(max_length=6)
-

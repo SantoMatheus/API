@@ -4,9 +4,8 @@ from rest_framework.views import APIView
 
 from conta.serializers import CriarContaSerializer, ContaCorrenteSerializer, ConsultarContaOutputSerializer, \
     DepositoInputSerializer, SaqueInputSerializer, TransferenciaInputSerializer, \
-    CriarBoletoInputSerializer, CriarBoletoOutputSerializer, MulticontaInputSerializer
+    MulticontaInputSerializer
 from conta.service import criar_conta, consultar_conta, aumentar_saldo, diminuir_saldo, transferir_saldo, multiconta
-from conta.service import gerar_boleto
 
 
 class CriarContaView(APIView):
@@ -80,25 +79,6 @@ class TransferenciaView(APIView):
         output = ConsultarContaOutputSerializer(instance=conta_corrente)
 
         return Response(data=output.data, status='202')
-
-
-
-class GerarBoletoView(APIView):
-    def post(self, request: Request):
-        serializer = CriarBoletoInputSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        body = serializer.validated_data
-        agencia = body['agencia']
-        conta_corrente = body['conta_corrente']
-        data_vencimento = body['data_vencimento']
-        valor = body['valor']
-
-        boleto = gerar_boleto(agencia=agencia, num_conta=conta_corrente, data_vencimento=data_vencimento, valor=valor)
-
-        output = CriarBoletoOutputSerializer(instance=boleto)
-
-        return Response(data=output.data, status=201)
 
 
 class MulticontaView(APIView):
