@@ -32,10 +32,12 @@ class ConsultaBoletosView(APIView):
         serializer = ConsultaBoletosInputSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
 
-        num_conta = serializer.validated_data['num_conta']
-        agencia = serializer.validated_data['agencia']
+        num_conta = serializer.validated_data.get('num_conta')
+        agencia = serializer.validated_data.get('agencia')
+        pago = serializer.validated_data.get('pago')
+        id_boleto = serializer.validated_data.get('id_boleto')
 
-        boletos = listar_boletos(num_conta=num_conta, agencia=agencia)
+        boletos = listar_boletos(num_conta=num_conta, agencia=agencia, pago=pago, id_boleto=id_boleto)
 
         output = ConsultaBoletosOutputSerializer(instance=boletos, many=True)
 
