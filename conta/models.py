@@ -11,3 +11,5 @@ class ContaCorrente(TimeStampedModel):
     agencia = models.CharField(max_length=6)
     num_conta = models.CharField(max_length=6)
 
+    objects = models.Manager()
+

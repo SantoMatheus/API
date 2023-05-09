@@ -2,6 +2,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from conta.factories import ContaCorrenteFactories
 from conta.serializers import CriarContaSerializer, ContaCorrenteSerializer, ConsultarContaOutputSerializer, \
     DepositoInputSerializer, SaqueInputSerializer, TransferenciaInputSerializer, \
     MulticontaInputSerializer
@@ -96,3 +97,18 @@ class MulticontaView(APIView):
 
         return Response(data=output.data, status=200)
 
+
+
+class IdealConsultaContaView(APIView):
+    get_output_serializer = ConsultarContaOutputSerializer
+    get_sucess_status = 200
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._consultar_conta_use_case = ContaCorrenteFactories.make_consultar_conta_use_case()
+
+    def get(self, request, agencia, conta):
+        conta_corrente = self._consultar_conta_use_case.execute(agencia=agencia, conta=conta)
+
+        output = self.get_output_serializer(instance=conta_corrente)
+        return Response(data=output.data, status=self.get_sucess_status)

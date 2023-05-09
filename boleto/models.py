@@ -11,3 +11,5 @@ class Boleto(TimeStampedModel):
     data_vencimento = models.DateField()
     pago = models.BooleanField(default=False)
 
+    objects = models.Manager()
+
