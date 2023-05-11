@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from conta.factories import ContaCorrenteFactories
 from conta.serializers import CriarContaSerializer, ContaCorrenteSerializer, ConsultarContaOutputSerializer, \
     DepositoInputSerializer, SaqueInputSerializer, TransferenciaInputSerializer, \
-    MulticontaInputSerializer
+    MulticontaInputSerializer, ConsultarContaInputSerializer
 from conta.service import criar_conta, consultar_conta, aumentar_saldo, diminuir_saldo, transferir_saldo, multiconta
 
 
@@ -25,10 +25,18 @@ class CriarContaView(APIView):
 
 
 class ConsultarContaView(APIView):
-    def get(self, request, agencia, num_conta):
-        conta = consultar_conta(agencia=agencia, num_conta=num_conta)
+    def get(self, request: Request):
+        serializer = ConsultarContaInputSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
 
-        output = ConsultarContaOutputSerializer(instance=conta)
+        agencia = serializer.validated_data['agencia']
+        num_conta = serializer.validated_data['num_conta']
+        cpf = serializer.validated_data['cpf']
+        id_conta = serializer.validated_data['id_conta']
+
+        conta_corrente = consultar_conta(agencia=agencia, num_conta=num_conta, cpf=cpf, id_conta=id_conta)
+
+        output = ConsultarContaOutputSerializer(instance=conta_corrente, many=True)
 
         return Response(data=output.data, status='200')
 

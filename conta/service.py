@@ -16,8 +16,19 @@ def gerar_num_conta() -> str:
     return str(num_conta)
 
 
-def consultar_conta(agencia, num_conta) -> ContaCorrente:
-    conta_corrente = ContaCorrente.objects.get(agencia=agencia, num_conta=num_conta)
+def consultar_conta(agencia=None, num_conta=None, id_conta=None, cpf=None) -> ContaCorrente:
+    parametros_conta = {}
+    if agencia:
+        parametros_conta['agencia'] = agencia
+    if num_conta:
+        parametros_conta['num_conta'] = num_conta
+    if id_conta:
+        parametros_conta['id_conta'] = num_conta
+    if cpf:
+        parametros_conta['cpf'] = cpf
+
+    conta_corrente = ContaCorrente.objects.filter(**parametros_conta)
+
     return conta_corrente
 
 
