@@ -29,12 +29,12 @@ class ConsultarContaView(APIView):
         serializer = ConsultarContaInputSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
 
-        agencia = serializer.validated_data['agencia']
-        num_conta = serializer.validated_data['num_conta']
-        cpf = serializer.validated_data['cpf']
-        id_conta = serializer.validated_data['id_conta']
+        agencia = serializer.validated_data.get('agencia')
+        num_conta = serializer.validated_data.get('num_conta')
+        cpf = serializer.validated_data.get('cpf')
+        id = serializer.validated_data.get('id')
 
-        conta_corrente = consultar_conta(agencia=agencia, num_conta=num_conta, cpf=cpf, id_conta=id_conta)
+        conta_corrente = consultar_conta(agencia=agencia, num_conta=num_conta, cpf=cpf, id_conta=id)
 
         output = ConsultarContaOutputSerializer(instance=conta_corrente, many=True)
 
