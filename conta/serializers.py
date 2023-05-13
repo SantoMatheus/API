@@ -14,9 +14,11 @@ class ContaCorrenteSerializer(serializers.ModelSerializer):
         exclude = ['created', 'modified']
 
 
-class ConsultarContaSerializer(serializers.Serializer):
-    agencia = serializers.CharField(max_length=6)
-    num_conta = serializers.CharField(max_length=6)
+class ConsultarContaInputSerializer(serializers.Serializer):
+    agencia = serializers.CharField(max_length=6, required=False)
+    num_conta = serializers.CharField(max_length=6, required=False)
+    cpf = serializers.CharField(max_length=11, required=False)
+    id_conta = serializers.UUIDField(required=False)
 
 
 class ConsultarContaOutputSerializer(serializers.ModelSerializer):
