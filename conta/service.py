@@ -23,7 +23,7 @@ def consultar_conta(agencia=None, num_conta=None, id_conta=None, cpf=None) -> Co
     if num_conta:
         parametros_conta['num_conta'] = num_conta
     if id_conta:
-        parametros_conta['id_conta'] = id_conta
+        parametros_conta['id'] = id_conta
     if cpf:
         parametros_conta['cpf'] = cpf
 
