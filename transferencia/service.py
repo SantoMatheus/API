@@ -1,6 +1,7 @@
-from conta.models import ContaCorrente
+import uuid
+
 from boleto.exceptions import SaldoInsuficiente
-from conta.service import consultar_conta, buscar_conta_por_agencia
+from conta.service import buscar_conta_por_agencia
 from transferencia.models import Transferencia
 
 
@@ -21,4 +22,7 @@ def transfer(agencia_origem, num_conta_origem, agencia_destino, num_conta_destin
     return transferencia
 
 
+def consulta_transferencia(id: uuid):
+    transferencia = Transferencia.objects.get(id=id)
+    return transferencia
 
