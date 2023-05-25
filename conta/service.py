@@ -33,7 +33,7 @@ def consultar_conta(agencia=None, num_conta=None, id_conta=None, cpf=None) -> Co
 
 
 def aumentar_saldo(agencia, num_conta, valor_deposito) -> ContaCorrente:
-    conta_corrente = consultar_conta(agencia=agencia, num_conta=num_conta)
+    conta_corrente = buscar_conta_por_agencia(agencia=agencia, num_conta=num_conta)
     conta_corrente.saldo += valor_deposito
     conta_corrente.save()
 
@@ -41,21 +41,15 @@ def aumentar_saldo(agencia, num_conta, valor_deposito) -> ContaCorrente:
 
 
 def diminuir_saldo(agencia, num_conta, valor_saque) -> ContaCorrente:
-    conta_corrente = consultar_conta(agencia=agencia, num_conta=num_conta)
+    conta_corrente = buscar_conta_por_agencia(agencia=agencia, num_conta=num_conta)
     conta_corrente.saldo -= valor_saque
     conta_corrente.save()
 
     return conta_corrente
 
 
-def transferir_saldo(agencia_origem, conta_origem, valor, agencia_destino, conta_destino):
-    conta_corrente = diminuir_saldo(agencia=agencia_origem, num_conta=conta_origem, valor_saque=valor)
-    aumentar_saldo(agencia=agencia_destino, num_conta=conta_destino, valor_deposito=valor)
-    return conta_corrente
-
-
 def multiconta(agencia, num_conta):
-    conta_corrente = consultar_conta(agencia=agencia, num_conta=num_conta)
+    conta_corrente = buscar_conta_por_agencia(agencia=agencia, num_conta=num_conta)
     nova_conta = criar_conta(nome=conta_corrente.nome, cpf=conta_corrente.cpf)
     return nova_conta
 

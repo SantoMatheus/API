@@ -6,7 +6,7 @@ from conta.factories import ContaCorrenteFactories
 from conta.serializers import CriarContaSerializer, ContaCorrenteSerializer, ConsultarContaOutputSerializer, \
     DepositoInputSerializer, SaqueInputSerializer, TransferenciaInputSerializer, \
     MulticontaInputSerializer, ConsultarContaInputSerializer
-from conta.service import criar_conta, consultar_conta, aumentar_saldo, diminuir_saldo, transferir_saldo, multiconta
+from conta.service import criar_conta, consultar_conta, aumentar_saldo, diminuir_saldo, multiconta
 
 
 class CriarContaView(APIView):
@@ -67,29 +67,6 @@ class SaqueView(APIView):
         return Response(data=output.data, status='202')
 
 
-class TransferenciaView(APIView):
-    def post(self, request: Request):
-        serializer = TransferenciaInputSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        body = serializer.validated_data
-        agencia_origem = body['agencia_origem']
-        conta_origem = body['conta_origem']
-        agencia_destino = body['agencia_destino']
-        conta_destino = body['conta_destino']
-        valor = body['valor']
-
-        conta_corrente = transferir_saldo(agencia_origem=agencia_origem,
-                                          conta_origem=conta_origem,
-                                          valor=valor,
-                                          agencia_destino=agencia_destino,
-                                          conta_destino=conta_destino)
-
-        output = ConsultarContaOutputSerializer(instance=conta_corrente)
-
-        return Response(data=output.data, status='202')
-
-
 class MulticontaView(APIView):
     def post(self, request: Request):
         serializer = MulticontaInputSerializer(data=request.data)
@@ -104,7 +81,6 @@ class MulticontaView(APIView):
         output = ConsultarContaOutputSerializer(instance=conta_corrente)
 
         return Response(data=output.data, status=200)
-
 
 
 class IdealConsultaContaView(APIView):
