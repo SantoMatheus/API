@@ -1,11 +1,11 @@
 from boleto.exceptions import BoletoPago, SaldoInsuficiente
 from boleto.models import Boleto
 from conta.models import ContaCorrente
-from conta.service import consultar_conta
+from conta.service import buscar_conta_por_agencia
 
 
 def gerar_boleto(num_conta, agencia, valor, data_vencimento):
-    conta_corrente = consultar_conta(agencia=agencia, num_conta=num_conta)
+    conta_corrente = buscar_conta_por_agencia(agencia=agencia, num_conta=num_conta)
     boleto = Boleto.objects.create(conta_corrente=conta_corrente, valor=valor, data_vencimento=data_vencimento)
     return boleto
 
@@ -29,7 +29,7 @@ def listar_boletos(agencia=None, num_conta=None, pago=None, id_boleto=None):
 
 
 def consulta_boleto(id_boleto, agencia, num_conta):
-    conta_corrente = consultar_conta(agencia=agencia, num_conta=num_conta)
+    conta_corrente = buscar_conta_por_agencia(agencia=agencia, num_conta=num_conta)
     boleto = Boleto.objects.get(conta_corrente=conta_corrente, id=id_boleto)
     return boleto
 
