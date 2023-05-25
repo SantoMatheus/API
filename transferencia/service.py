@@ -22,7 +22,7 @@ def transfer(agencia_origem, num_conta_origem, agencia_destino, num_conta_destin
     return transferencia
 
 
-def consulta_transferencia(id: uuid):
-    transferencia = Transferencia.objects.get(id=id)
+def consulta_transferencia(id_transferencia: uuid):
+    transferencia = Transferencia.objects.get(id_transferencia=id_transferencia)
     return transferencia
 

@@ -4,9 +4,8 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from transferencia.models import Transferencia
-from transferencia.serializers import TransferenciaInputSerializer, TransferenciaOutputSerializer, \
-    ConsultaTransferenciaInputSerializer
+
+from transferencia.serializers import TransferenciaInputSerializer, TransferenciaOutputSerializer
 from transferencia.service import transfer, consulta_transferencia
 
 
@@ -25,14 +24,11 @@ class TransferenciaView(APIView):
 
         return Response(data=output.data, status='202')
 
-class ConsultaTransferenciaView(APIView):
-    def get(self, request: Request, id: uuid):
-        serializer = ConsultaTransferenciaInputSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
 
-        transferencia = consulta_transferencia(id=id)
+class ConsultaTransferenciaView(APIView):
+    def get(self, id_transferencia: uuid):
+        transferencia = consulta_transferencia(id_transferencia=id_transferencia)
 
         output = TransferenciaOutputSerializer(instance=transferencia)
 
         return Response(data=output.data, status='200')
-

@@ -20,5 +20,3 @@ class TransferenciaOutputSerializer(serializers.ModelSerializer):
         model = Transferencia
         fields = '__all__'
 
-class ConsultaTransferenciaInputSerializer(serializers.Serializer):
-    id = serializers.UUIDField(default=uuid.uuid4)
