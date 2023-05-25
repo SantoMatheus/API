@@ -58,3 +58,8 @@ def multiconta(agencia, num_conta):
     conta_corrente = consultar_conta(agencia=agencia, num_conta=num_conta)
     nova_conta = criar_conta(nome=conta_corrente.nome, cpf=conta_corrente.cpf)
     return nova_conta
+
+
+def buscar_conta_por_agencia(agencia: str, num_conta: str) -> ContaCorrente:
+    conta_corrente = ContaCorrente.objects.get(agencia=agencia, num_conta=num_conta)
+    return conta_corrente

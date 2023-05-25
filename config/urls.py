@@ -28,4 +28,6 @@ urlpatterns = [
     path('api-docs', schema_view.with_ui('swagger', cache_timeout=None)),
     path('', include('conta.urls')),
     path('', include('boleto.urls')),
+    path('', include('transferencia.urls')),
+
 ]
