@@ -26,9 +26,10 @@ class TransferenciaView(APIView):
 
 
 class ConsultaTransferenciaView(APIView):
-    def get(self, id_transferencia: uuid.uuid4):
-        transferencia = consulta_transferencia(id_transferencia=id_transferencia)
+    def get(self, id_transferencia: uuid.uuid4, agencia_origem: str, num_conta_origem: str):
+        transferencia = consulta_transferencia(id_transferencia=id_transferencia, agencia_origem=agencia_origem,
+                                               num_conta_origem=num_conta_origem)
 
-        output = TransferenciaOutputSerializer(instance=transferencia)
+        output = TransferenciaOutputSerializer(instance=transferencia, many=True)
 
         return Response(data=output.data, status='200')
