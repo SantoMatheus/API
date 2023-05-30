@@ -1,3 +1,5 @@
+import uuid
+
 from rest_framework import serializers
 
 from conta.serializers import ConsultarContaOutputSerializer
@@ -17,3 +19,4 @@ class TransferenciaOutputSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transferencia
         fields = '__all__'
+

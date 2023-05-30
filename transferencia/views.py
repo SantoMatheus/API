@@ -1,10 +1,12 @@
+import uuid
+
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from transferencia.models import Transferencia
+
 from transferencia.serializers import TransferenciaInputSerializer, TransferenciaOutputSerializer
-from transferencia.service import transfer
+from transferencia.service import transfer, consulta_transferencia
 
 
 class TransferenciaView(APIView):
@@ -21,3 +23,16 @@ class TransferenciaView(APIView):
         output = TransferenciaOutputSerializer(instance=transferencia)
 
         return Response(data=output.data, status='202')
+
+
+class ConsultaTransferenciaView(APIView):
+    def get(self, request, agencia_origem: str, num_conta_origem: str, id_transferencia: uuid.UUID):
+
+        transferencia = consulta_transferencia(agencia=agencia_origem, num_conta_origem=num_conta_origem,
+                                               id_transferencia=id_transferencia)
+
+        output = TransferenciaOutputSerializer(instance=transferencia)
+
+
+        return Response(data=output.data, status='200')
+
