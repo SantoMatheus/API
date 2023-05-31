@@ -27,3 +27,8 @@ def consulta_transferencia(agencia: str, num_conta_origem: str, id_transferencia
     transferencia = Transferencia.objects.get(conta_origem=conta_origem, id=id_transferencia)
     return transferencia
 
+
+def listar_transferencias(agencia_origem: str, num_conta_origem: str):
+    conta_origem = buscar_conta_por_agencia(agencia=agencia_origem, num_conta=num_conta_origem)
+    transferencia = Transferencia.objects.filter(conta_origem=conta_origem)
+    return transferencia

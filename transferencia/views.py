@@ -4,9 +4,8 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-
 from transferencia.serializers import TransferenciaInputSerializer, TransferenciaOutputSerializer
-from transferencia.service import transfer, consulta_transferencia
+from transferencia.service import transfer, consulta_transferencia, listar_transferencias
 
 
 class TransferenciaView(APIView):
@@ -27,12 +26,18 @@ class TransferenciaView(APIView):
 
 class ConsultaTransferenciaView(APIView):
     def get(self, request, agencia_origem: str, num_conta_origem: str, id_transferencia: uuid.UUID):
-
         transferencia = consulta_transferencia(agencia=agencia_origem, num_conta_origem=num_conta_origem,
                                                id_transferencia=id_transferencia)
 
         output = TransferenciaOutputSerializer(instance=transferencia)
 
-
         return Response(data=output.data, status='200')
 
+
+class ListarTransferenciaView(APIView):
+    def get(self, request, num_conta_origem: str, agencia_origem: str):
+        transferencia = listar_transferencias(agencia_origem=agencia_origem, num_conta_origem=num_conta_origem)
+
+        output = TransferenciaOutputSerializer(instance=transferencia, many=True)
+
+        return Response(data=output.data, status='200')
