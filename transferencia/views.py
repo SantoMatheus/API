@@ -1,5 +1,6 @@
 import uuid
 
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -26,8 +27,13 @@ class TransferenciaView(APIView):
 
 class ConsultaTransferenciaView(APIView):
     def get(self, request, agencia_origem: str, num_conta_origem: str, id_transferencia: uuid.UUID):
-        transferencia = consulta_transferencia(agencia=agencia_origem, num_conta_origem=num_conta_origem,
-                                               id_transferencia=id_transferencia)
+
+        try:
+            transferencia = consulta_transferencia(agencia=agencia_origem, num_conta_origem=num_conta_origem,
+                                                   id_transferencia=id_transferencia)
+
+        except ObjectDoesNotExist:
+            return Response(status='404')
 
         output = TransferenciaOutputSerializer(instance=transferencia)
 
