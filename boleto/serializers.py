@@ -34,3 +34,5 @@ class ConsultaBoletosOutputSerializer(serializers.ModelSerializer):
 
 class PagarBoletoInputSerializer(serializers.Serializer):
     id_boleto = serializers.UUIDField()
+
+

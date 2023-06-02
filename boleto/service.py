@@ -1,3 +1,6 @@
+import uuid
+from datetime import date
+
 from boleto.exceptions import BoletoPago, SaldoInsuficiente
 from boleto.models import Boleto
 from conta.models import ContaCorrente
@@ -29,8 +32,11 @@ def listar_boletos(agencia=None, num_conta=None, pago=None, id_boleto=None):
 
 
 def consulta_boleto(id_boleto, agencia, num_conta):
+    data_atual = date.today()
     conta_corrente = buscar_conta_por_agencia(agencia=agencia, num_conta=num_conta)
     boleto = Boleto.objects.get(conta_corrente=conta_corrente, id=id_boleto)
+    if boleto.data_vencimento < data_atual:
+        boleto.status = 'Vencido'
     return boleto
 
 
@@ -39,14 +45,29 @@ def pagar_boleto(id_boleto, num_conta, agencia):
     saldo = boleto.conta_corrente.saldo
     pagamento = boleto.valor
 
-    if boleto.pago is True:
+    if boleto.status == 'Pago':
         raise BoletoPago('Boleto já liquidado.')
 
     if saldo <= pagamento:
         raise SaldoInsuficiente('Saldo insuficiente para este pagamento.')
 
     boleto.conta_corrente.saldo -= pagamento
+    boleto.status = 'Pago'
     boleto.pago = True
     boleto.save()
     boleto.conta_corrente.save()
+    return boleto
+
+
+def cancelar_boleto(id_boleto: uuid.UUID, agencia: str, num_conta: str) -> Boleto:
+    boleto = consulta_boleto(id_boleto=id_boleto, agencia=agencia, num_conta=num_conta)
+    data_atual = date.today()
+    if boleto.status == 'Pago':
+        raise BoletoPago('Boleto pagos não podem ser cancelados.')
+
+    if boleto.data_vencimento > data_atual:
+        raise BoletoPago('Boletos vencidos não podem ser cancelados.')
+
+    boleto.status = 'Cancelado'
+    boleto.save()
     return boleto
