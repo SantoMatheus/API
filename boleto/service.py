@@ -32,11 +32,8 @@ def listar_boletos(agencia=None, num_conta=None, pago=None, id_boleto=None):
 
 
 def consulta_boleto(id_boleto, agencia, num_conta):
-    data_atual = date.today()
     conta_corrente = buscar_conta_por_agencia(agencia=agencia, num_conta=num_conta)
     boleto = Boleto.objects.get(conta_corrente=conta_corrente, id=id_boleto)
-    if boleto.data_vencimento < data_atual:
-        boleto.status = 'Vencido'
     return boleto
 
 
