@@ -1,0 +1,2 @@
+class ValorChaveRequerido(Exception):
+    pass

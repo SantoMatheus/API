@@ -29,5 +29,6 @@ urlpatterns = [
     path('', include('conta.urls')),
     path('', include('boleto.urls')),
     path('', include('transferencia.urls')),
+    path('', include('pix.urls'))
 
 ]
