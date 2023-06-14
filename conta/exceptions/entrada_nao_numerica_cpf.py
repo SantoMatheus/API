@@ -1,0 +1,2 @@
+class CpfNaoNumerico(Exception):
+    pass

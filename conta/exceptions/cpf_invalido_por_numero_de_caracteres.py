@@ -1,0 +1,2 @@
+class NumeroDeCaracteresCpf(Exception):
+    pass

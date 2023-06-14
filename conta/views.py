@@ -1,30 +1,37 @@
+from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from conta.factories import ContaCorrenteFactories
+# from conta.factories import ContaCorrenteFactories
 from conta.serializers import CriarContaSerializer, ContaCorrenteSerializer, ConsultarContaOutputSerializer, \
-    DepositoInputSerializer, SaqueInputSerializer, TransferenciaInputSerializer, \
+    DepositoInputSerializer, SaqueInputSerializer,\
     MulticontaInputSerializer, ConsultarContaInputSerializer
-from conta.service import criar_conta, consultar_conta, aumentar_saldo, diminuir_saldo, multiconta
+from conta.service import consultar_conta, aumentar_saldo, diminuir_saldo, multiconta
+from conta.use_cases.criar_conta_use_case import CriarContaUseCase
 
 
 class CriarContaView(APIView):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.criar_conta_use_case = CriarContaUseCase()
+
     def post(self, request):
         serializer = CriarContaSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        body = serializer.validated_data
-        nome = body['nome']
-        cpf = body['cpf']
-        conta = criar_conta(nome=nome, cpf=cpf)
+        nome = serializer.validated_data['nome']
+        cpf = serializer.validated_data['cpf']
+
+        conta = self.criar_conta_use_case.execute(nome=nome, cpf=cpf)
 
         output = ContaCorrenteSerializer(instance=conta)
 
-        return Response(data=output.data, status='201')
+        return Response(data=output.data, status=status.HTTP_201_CREATED)
 
 
 class ConsultarContaView(APIView):
+
     def get(self, request: Request):
         serializer = ConsultarContaInputSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
