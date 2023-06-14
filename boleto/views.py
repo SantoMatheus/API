@@ -6,7 +6,7 @@ from boleto.exceptions import BoletoPago, SaldoInsuficiente
 from boleto.serializers import (CriarBoletoInputSerializer, CriarBoletoOutputSerializer,
                                 ConsultaBoletosOutputSerializer, ConsultaBoletosInputSerializer,
                                 PagarBoletoInputSerializer)
-from boleto.service import gerar_boleto, listar_boletos, pagar_boleto
+from boleto.service import gerar_boleto, listar_boletos, pagar_boleto, cancelar_boleto
 
 
 class GerarBoletoView(APIView):
@@ -59,3 +59,23 @@ class PagarBoletoView(APIView):
         output = ConsultaBoletosOutputSerializer(instance=boleto)
 
         return Response(data=output.data, status=200)
+
+
+class CancelarBoletoView(APIView):
+    def delete(self, request: Request, num_conta: str, agencia: str):
+        serializer = PagarBoletoInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        id_boleto = serializer.validated_data['id_boleto']
+
+        try:
+            boleto = cancelar_boleto(id_boleto=id_boleto, agencia=agencia, num_conta=num_conta)
+
+        except BoletoPago as exc:
+            return Response(status=400, data=exc.args[0])
+
+        output = ConsultaBoletosOutputSerializer(instance=boleto)
+
+        return Response(data=output.data, status=200)
+
+
