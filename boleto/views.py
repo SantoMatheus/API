@@ -71,7 +71,7 @@ class CancelarBoletoView(APIView):
         try:
             boleto = cancelar_boleto(id_boleto=id_boleto, agencia=agencia, num_conta=num_conta)
 
-        except (BoletoPago) as exc:
+        except BoletoPago as exc:
             return Response(status=400, data=exc.args[0])
 
         output = ConsultaBoletosOutputSerializer(instance=boleto)

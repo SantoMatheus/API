@@ -58,12 +58,8 @@ def pagar_boleto(id_boleto, num_conta, agencia):
 
 def cancelar_boleto(id_boleto: uuid.UUID, agencia: str, num_conta: str) -> Boleto:
     boleto = consulta_boleto(id_boleto=id_boleto, agencia=agencia, num_conta=num_conta)
-    data_atual = date.today()
     if boleto.status == 'Pago':
         raise BoletoPago('Boleto pagos não podem ser cancelados.')
-
-    if boleto.data_vencimento > data_atual:
-        raise BoletoPago('Boletos vencidos não podem ser cancelados.')
 
     boleto.status = 'Cancelado'
     boleto.save()
