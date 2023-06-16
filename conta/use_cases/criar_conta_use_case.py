@@ -8,18 +8,10 @@ from conta.use_cases.gerar_num_conta_use_case import GerarNumContaUseCase
 
 class CriarContaUseCase:
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self):
         self.gerar_num_conta_use_case = GerarNumContaUseCase()
 
     def execute(self, nome: str, cpf: str) -> ContaCorrente:
-        if len(cpf) != 11:
-            raise NumeroDeCaracteresCpf("Informe um número de CPF válido.")
-        if cpf.isdigit() is False:
-            raise CpfInvalidoTipoCaracter('Informe apenas os números do CPF.')
-        if cpf is None:
-            raise CpfNaoInformado('Informe algum valor para o CPF. Apenas os números.')
-
         num_conta = self.gerar_num_conta_use_case.execute()
         conta_criada = ContaCorrente.objects.create(nome=nome, cpf=cpf, agencia='0001', num_conta=num_conta)
         return conta_criada

@@ -8,21 +8,12 @@ from conta.use_cases.buscar_conta_por_agencia_use_case import BuscarContaPorAgen
 
 class DepositoUseCase:
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self):
         self.buscar_conta_por_agencia_use_case = BuscarContaPorAgenciaUseCase()
 
     def execute(self, agencia: str, num_conta: str, valor_deposito: float):
         conta_corrente = self.buscar_conta_por_agencia_use_case.execute(agencia=agencia, num_conta=num_conta)
 
-        if agencia is None:
-            raise AgenciaNulo('Informe um número de agencia.')
-        if num_conta is None:
-            raise NumContaNulo('Informe um número de conta.')
-        if agencia is not True:
-            raise AgenciaInvalido('Informe um número de agencia válido.')
-        if num_conta is not True:
-            raise NumContaInvalido('Informe um número de conta válido.')
         if conta_corrente.saldo < valor_deposito:
             raise SaldoInsuficiente('Saldo insuficiente para a operação desejada.')
 

@@ -4,13 +4,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 # from conta.factories import ContaCorrenteFactories
-from conta.exceptions.agencia_invalido import AgenciaInvalido
-from conta.exceptions.agencia_is_None import AgenciaNulo
-from conta.exceptions.cpf_invalido_por_numero_de_caracteres import NumeroDeCaracteresCpf
-from conta.exceptions.cpf_nao_informado import CpfNaoInformado
-from conta.exceptions.id_conta_formato_inválido import IdContaFormatoInvalido
-from conta.exceptions.num_conta_invalido import NumContaInvalido
-from conta.exceptions.num_conta_is_none import NumContaNulo
 from conta.exceptions.saldo_insuficiente import SaldoInsuficiente
 from conta.serializers import CriarContaSerializer, ContaCorrenteSerializer, ConsultarContaOutputSerializer, \
     DepositoInputSerializer, SaqueInputSerializer, \
@@ -35,11 +28,7 @@ class CriarContaView(APIView):
         nome = serializer.validated_data['nome']
         cpf = serializer.validated_data['cpf']
 
-        try:
-            conta = self.criar_conta_use_case.execute(nome=nome, cpf=cpf)
-        except (AgenciaInvalido, AgenciaNulo, NumContaInvalido, NumContaNulo, NumeroDeCaracteresCpf, CpfNaoInformado) \
-                as exc:
-            return Response(status=status.HTTP_404_NOT_FOUND, data=exc.args[0])
+        conta = self.criar_conta_use_case.execute(nome=nome, cpf=cpf)
 
         output = ContaCorrenteSerializer(instance=conta)
         return Response(data=output.data, status=status.HTTP_201_CREATED)
@@ -60,11 +49,8 @@ class ListarContaView(APIView):
         id_conta = serializer.validated_data.get('id_conta')
         cpf = serializer.validated_data.get('cpf')
 
-        try:
-            conta_corrente = self.listar_conta_use_case.execute(agencia=agencia, num_conta=num_conta, cpf=cpf,
-                                                                id_conta=id_conta)
-        except (AgenciaInvalido, NumContaInvalido, IdContaFormatoInvalido) as exc:
-            return Response(data=exc.args[0], status=status.HTTP_404_NOT_FOUND)
+        conta_corrente = self.listar_conta_use_case.execute(agencia=agencia, num_conta=num_conta, cpf=cpf,
+                                                            id_conta=id_conta)
 
         output = ConsultarContaOutputSerializer(instance=conta_corrente, many=True)
         return Response(data=output.data, status='200')
@@ -85,7 +71,7 @@ class DepositoView(APIView):
         try:
             conta_atualizada = self.deposito_use_case.execute(agencia=agencia, num_conta=num_conta,
                                                               valor_deposito=valor_deposito)
-        except (AgenciaInvalido, NumContaInvalido, SaldoInsuficiente, AgenciaNulo, NumContaNulo) as exc:
+        except SaldoInsuficiente as exc:
             return Response(data=exc.args[0], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         output = ConsultarContaOutputSerializer(instance=conta_atualizada)
@@ -107,7 +93,7 @@ class SaqueView(APIView):
         try:
             conta_atualizada = self.saque_use_case.execute(agencia=agencia, num_conta=num_conta,
                                                            valor_saque=valor_saque)
-        except (AgenciaInvalido, NumContaInvalido, SaldoInsuficiente, AgenciaNulo, NumContaNulo) as exc:
+        except SaldoInsuficiente as exc:
             return Response(data=exc.args[0], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         output = ConsultarContaOutputSerializer(instance=conta_atualizada)
@@ -127,13 +113,10 @@ class MulticontaView(APIView):
         agencia = serializer.validated_data['agencia']
         numero_conta_origem = serializer.validated_data['conta_origem']
 
-        try:
-            conta_corrente = self.multiconta_use_case.execute(agencia=agencia, num_conta=numero_conta_origem)
-        except (AgenciaInvalido, NumContaInvalido, AgenciaNulo, NumContaNulo) as exc:
-            return Response(data=exc.args[0], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        conta_corrente = self.multiconta_use_case.execute(agencia=agencia, num_conta=numero_conta_origem)
 
         output = ConsultarContaOutputSerializer(instance=conta_corrente)
-        return Response(data=output.data, status=200)
+        return Response(data=output.data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # class IdealConsultaContaView(APIView):
 #     get_output_serializer = ConsultarContaOutputSerializer
