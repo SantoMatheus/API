@@ -1,7 +1,6 @@
 import uuid
 
 from boleto.exceptions import SaldoInsuficiente
-from conta.service import buscar_conta_por_agencia
 from transferencia.models import Transferencia
 
 

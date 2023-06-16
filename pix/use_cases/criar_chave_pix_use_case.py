@@ -1,6 +1,6 @@
 import uuid
 
-from conta.service import buscar_conta_por_agencia
+
 from pix.exceptions.valor_chave_requerido import ValorChaveRequerido
 from pix.models import ChavePix, TipoChavePixChoice
 

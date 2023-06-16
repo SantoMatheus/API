@@ -1,0 +1,2 @@
+class CpfNaoInformado(Exception):
+    pass

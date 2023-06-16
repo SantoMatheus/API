@@ -1,0 +1,2 @@
+class IdContaFormatoInvalido(Exception):
+    pass

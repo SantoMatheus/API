@@ -17,8 +17,8 @@ class ContaCorrenteSerializer(serializers.ModelSerializer):
 class ConsultarContaInputSerializer(serializers.Serializer):
     agencia = serializers.CharField(max_length=6, required=False)
     num_conta = serializers.CharField(max_length=6, required=False)
-    cpf = serializers.CharField(max_length=11, required=False)
     id_conta = serializers.UUIDField(required=False)
+    cpf = serializers.CharField(max_length=11, required=False)
 
 
 class ConsultarContaOutputSerializer(serializers.ModelSerializer):

@@ -1,0 +1,2 @@
+class NumContaInvalido(Exception):
+    pass
