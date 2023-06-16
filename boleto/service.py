@@ -1,7 +1,7 @@
 from boleto.exceptions import BoletoPago, SaldoInsuficiente
 from boleto.models import Boleto
 from conta.models import ContaCorrente
-from conta.service import buscar_conta_por_agencia
+
 
 
 def gerar_boleto(num_conta, agencia, valor, data_vencimento):
