@@ -1,9 +1,3 @@
-from rest_framework import status
-
-from conta.exceptions.agencia_invalido import AgenciaInvalido
-from conta.exceptions.agencia_is_None import AgenciaNulo
-from conta.exceptions.num_conta_invalido import NumContaInvalido
-from conta.exceptions.num_conta_is_none import NumContaNulo
 from conta.models import ContaCorrente
 
 

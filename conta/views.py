@@ -1,9 +1,11 @@
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
 
-# from conta.factories import ContaCorrenteFactories
 from conta.exceptions.saldo_insuficiente import SaldoInsuficiente
 from conta.serializers import CriarContaSerializer, ContaCorrenteSerializer, ConsultarContaOutputSerializer, \
     DepositoInputSerializer, SaqueInputSerializer, \
@@ -21,6 +23,11 @@ class CriarContaView(APIView):
         super().__init__(*args, **kwargs)
         self.criar_conta_use_case = CriarContaUseCase()
 
+    @extend_schema(
+        request=CriarContaSerializer(),
+        responses={status.HTTP_201_CREATED: ContaCorrenteSerializer(),
+            status.HTTP_400_BAD_REQUEST: 'Bad request.'},
+    )
     def post(self, request):
         serializer = CriarContaSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -40,6 +47,11 @@ class ListarContaView(APIView):
         super().__init__(*args, **kwargs)
         self.listar_conta_use_case = ListarContaUseCase()
 
+    @extend_schema(
+        request=CriarContaSerializer(),
+        responses={status.HTTP_201_CREATED: ContaCorrenteSerializer(),
+                   status.HTTP_400_BAD_REQUEST: 'Bad request.'},
+    )
     def get(self, request: Request):
         serializer = ConsultarContaInputSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
@@ -62,6 +74,13 @@ class DepositoView(APIView):
         super().__init__(*args, **kwargs)
         self.deposito_use_case = DepositoUseCase()
 
+    @swagger_auto_schema(
+        request_body=DepositoInputSerializer(),
+        responses={
+            status.HTTP_201_CREATED: ConsultarContaOutputSerializer(),
+            status.HTTP_400_BAD_REQUEST: 'Bad request.'
+        }
+    )
     def patch(self, request: Request, agencia: str, num_conta: str):
         serializer = DepositoInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -84,6 +103,13 @@ class SaqueView(APIView):
         super().__init__(*args, **kwargs)
         self.saque_use_case = SaqueUseCase()
 
+    @swagger_auto_schema(
+        request_body=SaqueInputSerializer(),
+        responses={
+            status.HTTP_201_CREATED: ConsultarContaOutputSerializer(),
+            status.HTTP_400_BAD_REQUEST: 'Bad request.'
+        }
+    )
     def patch(self, request: Request, agencia: str, num_conta: str):
         serializer = SaqueInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -106,6 +132,13 @@ class MulticontaView(APIView):
         super().__init__(*args, **kwargs)
         self.multiconta_use_case = MulticontaUseCase()
 
+    @swagger_auto_schema(
+        request_body=MulticontaInputSerializer(),
+        responses={
+            status.HTTP_201_CREATED: ConsultarContaOutputSerializer(),
+            status.HTTP_400_BAD_REQUEST: 'Bad request.'
+        }
+    )
     def post(self, request: Request):
         serializer = MulticontaInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -117,17 +150,3 @@ class MulticontaView(APIView):
 
         output = ConsultarContaOutputSerializer(instance=conta_corrente)
         return Response(data=output.data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-# class IdealConsultaContaView(APIView):
-#     get_output_serializer = ConsultarContaOutputSerializer
-#     get_sucess_status = 200
-#
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self._consultar_conta_use_case = ContaCorrenteFactories.make_consultar_conta_use_case()
-#
-#     def get(self, request, agencia, conta):
-#         conta_corrente = self._consultar_conta_use_case.execute(agencia=agencia, conta=conta)
-#
-#         output = self.get_output_serializer(instance=conta_corrente)
-#         return Response(data=output.data, status=self.get_sucess_status)

@@ -1,3 +1,5 @@
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -6,8 +8,7 @@ from boleto.exceptions import BoletoPago, SaldoInsuficiente
 from boleto.serializers import (CriarBoletoInputSerializer, CriarBoletoOutputSerializer,
                                 ConsultaBoletosOutputSerializer, ConsultaBoletosInputSerializer,
                                 PagarBoletoInputSerializer)
-from boleto.service import pagar_boleto
-from boleto.use_cases.consulta_boleto_use_case import ConsultaBoletoUseCase
+
 from boleto.use_cases.gerar_boleto_use_case import GerarBoletoUseCase
 from boleto.use_cases.listar_boleto_use_case import ListarBoletoUseCase
 from boleto.use_cases.pagar_boleto_use_case import PagarBoletoUseCase
@@ -16,9 +17,16 @@ from boleto.use_cases.pagar_boleto_use_case import PagarBoletoUseCase
 class GerarBoletoView(APIView):
 
     def __init__(self, *args, **kwargs):
-        super().__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.gerar_boleto_use_case = GerarBoletoUseCase()
 
+    @swagger_auto_schema(
+        request_body=CriarBoletoInputSerializer(),
+        responses={
+            status.HTTP_201_CREATED: CriarBoletoOutputSerializer(),
+            status.HTTP_400_BAD_REQUEST: 'Bad request.'
+        }
+    )
     def post(self, request: Request):
         serializer = CriarBoletoInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -29,7 +37,8 @@ class GerarBoletoView(APIView):
         data_vencimento = body['data_vencimento']
         valor = body['valor']
 
-        boleto = self.gerar_boleto_use_case.execute(agencia=agencia, num_conta=conta_corrente, data_vencimento=data_vencimento, valor=valor)
+        boleto = self.gerar_boleto_use_case.execute(agencia=agencia, num_conta=conta_corrente,
+                                                    data_vencimento=data_vencimento, valor=valor)
 
         output = CriarBoletoOutputSerializer(instance=boleto)
 
@@ -39,7 +48,7 @@ class GerarBoletoView(APIView):
 class ConsultaBoletosView(APIView):
 
     def __init__(self, *args, **kwargs):
-        super().__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.gerar_boleto_use_case = GerarBoletoUseCase()
         self.listar_boletos_use_case = ListarBoletoUseCase()
 
@@ -63,7 +72,7 @@ class ConsultaBoletosView(APIView):
 class PagarBoletoView(APIView):
 
     def __init__(self, *args, **kwargs):
-        super().__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.pagar_boleto_use_case = PagarBoletoUseCase()
 
     def patch(self, request: Request, num_conta, agencia):
