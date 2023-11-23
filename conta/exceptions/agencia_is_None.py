@@ -1,0 +1,2 @@
+class AgenciaNulo(Exception):
+    pass
