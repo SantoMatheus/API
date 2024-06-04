@@ -17,14 +17,13 @@ class CriarBoletoOutputSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ConsultaBoletosInputSerializer(serializers.Serializer):
+class ListarBoletosInputSerializer(serializers.Serializer):
     num_conta = serializers.CharField(max_length=6, required=False)
-    agencia = serializers.CharField(max_length=6, required=False)
     pago = serializers.BooleanField(required=False)
     id_boleto = serializers.UUIDField(required=False)
 
 
-class ConsultaBoletosOutputSerializer(serializers.ModelSerializer):
+class ListarBoletosOutputSerializer(serializers.ModelSerializer):
     conta_corrente = ConsultarContaOutputSerializer()
 
     class Meta:
@@ -32,7 +31,6 @@ class ConsultaBoletosOutputSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class PagarBoletoInputSerializer(serializers.Serializer):
+class ConsultarBoletoInputSerializer(serializers.Serializer):
     id_boleto = serializers.UUIDField()
-
 

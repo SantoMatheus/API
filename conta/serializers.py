@@ -1,5 +1,4 @@
 from rest_framework import serializers
-
 from conta.models import ContaCorrente
 
 

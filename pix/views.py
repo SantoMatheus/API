@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -15,7 +14,7 @@ class CriarChavePixView(APIView):
         super().__init__(*args, **kwargs)
         self.chave_pix_use_case = CriarChavePixUseCase()
 
-    def post(self, request:Request, agencia: str, num_conta: str):
+    def post(self, request: Request, agencia: str, num_conta: str):
         serializer = CriarChavePixInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
