@@ -1,23 +1,23 @@
 import uuid
 
 from boleto.exceptions import BoletoPago, SaldoInsuficiente
-from boleto.use_cases.consulta_boleto_use_case import ConsultaBoletoUseCase
+from boleto.use_cases.consulta_boleto_use_case import ConsultarBoletoUseCase
 
 
 class PagarBoletoUseCase:
 
     def __init__(self):
-        self.consulta_boleto_use_case = ConsultaBoletoUseCase()
+        self.consulta_boleto_use_case = ConsultarBoletoUseCase()
 
-    def execute(self, id_boleto: uuid, num_conta: str, agencia: str):
-        boleto = self.consulta_boleto_use_case.execute(id_boleto=id_boleto, num_conta=num_conta, agencia=agencia)
+    def execute(self, id_boleto: uuid.UUID):
+        boleto = self.consulta_boleto_use_case.objects.get(id_boleto=id_boleto)
         saldo = boleto.conta_corrente.saldo
         pagamento = boleto.valor
 
         if boleto.pago is True:
             raise BoletoPago('Boleto já liquidado.')
 
-        if saldo <= pagamento:
+        if saldo < pagamento:
             raise SaldoInsuficiente('Saldo insuficiente para este pagamento.')
 
         boleto.conta_corrente.saldo -= pagamento

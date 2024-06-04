@@ -10,6 +10,7 @@ class Boleto(TimeStampedModel):
     valor = models.FloatField()
     data_vencimento = models.DateField()
     pago = models.BooleanField(default=False)
+    status = models.CharField(max_length=100, default='Pendente')
 
     objects = models.Manager()
 

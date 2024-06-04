@@ -1,9 +1,5 @@
 import uuid
 
-from conta.exceptions.agencia_invalido import AgenciaInvalido
-from conta.exceptions.cpf_invalido_por_numero_de_caracteres import NumeroDeCaracteresCpf
-from conta.exceptions.id_conta_formato_inválido import IdContaFormatoInvalido
-from conta.exceptions.num_conta_invalido import NumContaInvalido
 from conta.models import ContaCorrente
 
 
