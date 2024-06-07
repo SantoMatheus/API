@@ -7,9 +7,9 @@ from rest_framework.views import APIView
 from boleto.exceptions import BoletoPago, SaldoInsuficiente
 from boleto.serializers import (CriarBoletoInputSerializer, CriarBoletoOutputSerializer,
                                 ListarBoletosOutputSerializer, ListarBoletosInputSerializer,
-                                ConsultarBoletoInputSerializer)
+                                ConsultaBoletoPorIdInputSerializer)
 from boleto.use_cases.cancelar_boleto_use_case import CancelarBoletoUseCase
-from boleto.use_cases.consulta_boleto_use_case import ConsultarBoletoUseCase
+from boleto.use_cases.consulta_boleto_por_id_use_case import ConsultaBoletoPorIdUseCase
 from boleto.use_cases.gerar_boleto_use_case import GerarBoletoUseCase
 from boleto.use_cases.listar_boleto_use_case import ListarBoletoUseCase
 from boleto.use_cases.pagar_boleto_use_case import PagarBoletoUseCase
@@ -50,11 +50,10 @@ class ListarBoletosView(APIView):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.gerar_boleto_use_case = GerarBoletoUseCase()
         self.listar_boletos_use_case = ListarBoletoUseCase()
 
     @swagger_auto_schema(
-        request_body=ListarBoletosInputSerializer(),
+        query_serializer=ListarBoletosInputSerializer(),
         responses={
             status.HTTP_201_CREATED: ListarBoletosOutputSerializer(),
             status.HTTP_400_BAD_REQUEST: 'Bad request.'
@@ -64,12 +63,13 @@ class ListarBoletosView(APIView):
         serializer = ListarBoletosInputSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
 
-        num_conta = serializer.validated_data.get('num_conta')
+        id_conta = serializer.validated_data.get('id_conta')
         agencia = serializer.validated_data.get('agencia')
-        pago = serializer.validated_data.get('pago')
+        status_boleto = serializer.validated_data.get('status')
         id_boleto = serializer.validated_data.get('id_boleto')
 
-        boletos = self.listar_boletos_use_case.execute(num_conta=num_conta, agencia=agencia, pago=pago,
+        boletos = self.listar_boletos_use_case.execute(id_conta=id_conta, agencia=agencia,
+                                                       status=status_boleto,
                                                        id_boleto=id_boleto)
 
         output = ListarBoletosOutputSerializer(instance=boletos, many=True)
@@ -84,20 +84,21 @@ class PagarBoletoView(APIView):
         self.pagar_boleto_use_case = PagarBoletoUseCase()
 
     @swagger_auto_schema(
-        request_body=ConsultarBoletoInputSerializer(),
+        query_serializer=ConsultaBoletoPorIdInputSerializer(),
         responses={
             status.HTTP_201_CREATED: ListarBoletosOutputSerializer(),
             status.HTTP_400_BAD_REQUEST: 'Bad request.'
         }
     )
-    def patch(self, request: Request):
-        serializer = ConsultarBoletoInputSerializer(data=request.data)
+    def patch(self, request: Request, num_conta_sacado: str, agencia_sacado: str):
+        serializer = ConsultaBoletoPorIdInputSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
 
         id_boleto = serializer.validated_data['id_boleto']
 
         try:
-            boleto = self.pagar_boleto_use_case.execute(id_boleto=id_boleto)
+            boleto = self.pagar_boleto_use_case.execute(id_boleto=id_boleto, num_conta_sacado=num_conta_sacado,
+                                                        agencia_sacado=agencia_sacado)
 
         except (BoletoPago, SaldoInsuficiente) as exc:
             return Response(status=400, data=exc.args[0])
@@ -114,14 +115,14 @@ class CancelarBoletoView(APIView):
         self.cancelar_boleto_use_case = CancelarBoletoUseCase()
 
     @swagger_auto_schema(
-        request_body=ConsultarBoletoInputSerializer(),
+        query_serializer=ConsultaBoletoPorIdInputSerializer(),
         responses={
             status.HTTP_201_CREATED: CriarBoletoOutputSerializer(),
             status.HTTP_400_BAD_REQUEST: 'Bad request.'
         }
     )
     def delete(self, request: Request):
-        serializer = ConsultarBoletoInputSerializer(data=request.data)
+        serializer = ConsultaBoletoPorIdInputSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
 
         id_boleto = serializer.validated_data['id_boleto']
@@ -137,32 +138,27 @@ class CancelarBoletoView(APIView):
         return Response(data=output.data, status=200)
 
 
-class ConsultarBoletoView(APIView):
+class ConsultaBoletoPorIdView(APIView):
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.consultar_boleto_use_case = ConsultarBoletoUseCase()
+        super().__init__(*args, *kwargs)
+        self.consulta_boleto_por_id_use_case = ConsultaBoletoPorIdUseCase()
 
     @swagger_auto_schema(
-        request_body=ConsultarBoletoInputSerializer(),
+        query_serializer=ConsultaBoletoPorIdInputSerializer(),
         responses={
             status.HTTP_201_CREATED: CriarBoletoOutputSerializer(),
             status.HTTP_400_BAD_REQUEST: 'Bad request.'
         }
     )
-    def delete(self, request: Request):
-        serializer = ConsultarBoletoInputSerializer(data=request.data)
+    def get(self, request: Request):
+        serializer = ConsultaBoletoPorIdInputSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
 
         id_boleto = serializer.validated_data['id_boleto']
 
-        try:
-            boleto = self.consultar_boleto_use_case.execute(id_boleto=id_boleto)
-
-        except BoletoPago as exc:
-            return Response(status=400, data=exc.args[0])
+        boleto = self.consulta_boleto_por_id_use_case.execute(id_boleto=id_boleto)
 
         output = CriarBoletoOutputSerializer(instance=boleto)
 
         return Response(data=output.data, status=200)
-
