@@ -42,7 +42,9 @@ INSTALLED_APPS = [
     'boleto',
     'transferencia',
     'pix',
-    'drf_spectacular'
+    'drf_spectacular',
+    'drf_yasg',
+
 ]
 
 MIDDLEWARE = [

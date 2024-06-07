@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from boleto.models import Boleto
-from conta.serializers import ConsultarContaOutputSerializer
 
 
 class CriarBoletoInputSerializer(serializers.Serializer):
@@ -18,19 +17,17 @@ class CriarBoletoOutputSerializer(serializers.ModelSerializer):
 
 
 class ListarBoletosInputSerializer(serializers.Serializer):
-    num_conta = serializers.CharField(max_length=6, required=False)
-    pago = serializers.BooleanField(required=False)
+    id_conta = serializers.CharField(required=False)
+    status = serializers.CharField(required=False)
     id_boleto = serializers.UUIDField(required=False)
 
 
 class ListarBoletosOutputSerializer(serializers.ModelSerializer):
-    conta_corrente = ConsultarContaOutputSerializer()
-
     class Meta:
         model = Boleto
         fields = '__all__'
 
 
-class ConsultarBoletoInputSerializer(serializers.Serializer):
+class ConsultaBoletoPorIdInputSerializer(serializers.Serializer):
     id_boleto = serializers.UUIDField()
 

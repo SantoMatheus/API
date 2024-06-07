@@ -1,13 +1,14 @@
 from django.urls import path
 
-from boleto.views import GerarBoletoView, ListarBoletosView, PagarBoletoView, CancelarBoletoView, ConsultarBoletoView
+from boleto.views import GerarBoletoView, ListarBoletosView, PagarBoletoView, CancelarBoletoView, \
+    ConsultaBoletoPorIdView
 
 app_name = 'boleto'
 
 urlpatterns = [
-    path('boleto/gerarboleto', GerarBoletoView.as_view()),
-    path('boleto/listar', ListarBoletosView.as_view()),
-    path('boleto/consultar/<str:id_boleto>', ConsultarBoletoView.as_view()),
-    path('boleto/pagamento/<str:id_boleto>', PagarBoletoView.as_view()),
-    path('boleto/cancelamento/<str:id_boleto>', CancelarBoletoView.as_view())
+    path('boletos/gerar_boleto', GerarBoletoView.as_view()),
+    path('boletos/listar', ListarBoletosView.as_view(), name='listar_boletos'),
+    path('boletos/consultar/', ConsultaBoletoPorIdView.as_view()),
+    path('boletos/pagamento/<str:num_conta_sacado>/<str:agencia_sacado>', PagarBoletoView.as_view()),
+    path('boletos/cancelamento/', CancelarBoletoView.as_view())
 ]
