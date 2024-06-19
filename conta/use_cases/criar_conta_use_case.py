@@ -13,7 +13,7 @@ class CriarContaUseCase:
 
     def execute(self, nome: str, cpf: str) -> ContaCorrente:
         num_conta = self.gerar_num_conta_use_case.execute()
-        conta_criada = ContaCorrente.objects.create(nome=nome, cpf=cpf, agencia='0001', num_conta=num_conta)
-        return conta_criada
+        return ContaCorrente.objects.create(nome=nome, cpf=cpf, agencia='0001', num_conta=num_conta)
+
 
 

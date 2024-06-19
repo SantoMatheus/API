@@ -1,23 +1,23 @@
 from rest_framework import serializers
-from conta.models import ContaCorrente
+from conta.models import ContaCorrente, Saque, Transferencia, Deposito
 
 
-class CriarContaSerializer(serializers.Serializer):
+class CriarContaInputSerializer(serializers.Serializer):
     nome = serializers.CharField(required=True, max_length=55)
     cpf = serializers.CharField(required=True, max_length=11, min_length=11)
 
 
-class ContaCorrenteSerializer(serializers.ModelSerializer):
+class CriarContaCorrenteOutputSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContaCorrente
         exclude = ['created', 'modified']
 
 
 class ConsultarContaInputSerializer(serializers.Serializer):
-    agencia = serializers.CharField(max_length=6, required=False)
-    num_conta = serializers.CharField(max_length=6, required=False)
-    id_conta = serializers.UUIDField(required=False)
-    cpf = serializers.CharField(max_length=11, required=False)
+    agencia = serializers.CharField(max_length=6, required=False, allow_null=True)
+    num_conta = serializers.CharField(max_length=6, required=False, allow_null=True)
+    id_conta = serializers.UUIDField(required=False, allow_null=True)
+    cpf = serializers.CharField(max_length=11, required=False, allow_null=True)
 
 
 class ConsultarContaOutputSerializer(serializers.ModelSerializer):
@@ -45,3 +45,42 @@ class TransferenciaInputSerializer(serializers.Serializer):
 class MulticontaInputSerializer(serializers.Serializer):
     agencia = serializers.CharField(max_length=6)
     conta_origem = serializers.CharField(max_length=6)
+
+class SaqueOutputSerializer(serializers.ModelSerializer):
+    conta_corrente = ConsultarContaOutputSerializer()
+
+    class Meta:
+        model = Saque
+        fields = '__all__'
+
+
+class DepositoOutputSerializer(serializers.ModelSerializer):
+    conta_corrente = ConsultarContaOutputSerializer()
+
+    class Meta:
+        model = Deposito
+        fields = '__all__'
+
+
+class TransferenciaInputSerializer(serializers.Serializer):
+    agencia_destino = serializers.CharField(max_length=6, required=True)
+    num_conta_destino = serializers.CharField(max_length=6, required=True)
+    valor = serializers.FloatField(required=True)
+
+
+class TransferenciaOutputSerializer(serializers.ModelSerializer):
+    conta_origem = ConsultarContaOutputSerializer()
+    conta_destino = ConsultarContaOutputSerializer()
+
+    class Meta:
+        model = Transferencia
+        fields = '__all__'
+
+
+class ListarTransferenciaInputSerializer(serializers.Serializer):
+    agencia_origem = serializers.CharField(required=False)
+    num_conta_origem = serializers.CharField(required=False)
+    agencia_destino = serializers.CharField(required=False)
+    num_conta_destino = serializers.CharField(required=False)
+    id_transferencia = serializers.UUIDField(required=False)
+    valor = serializers.FloatField(required=False)

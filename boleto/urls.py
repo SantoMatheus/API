@@ -9,6 +9,6 @@ urlpatterns = [
     path('boletos/gerar_boleto', GerarBoletoView.as_view()),
     path('boletos/listar', ListarBoletosView.as_view(), name='listar_boletos'),
     path('boletos/consultar/', ConsultaBoletoPorIdView.as_view()),
-    path('boletos/pagamento/<str:num_conta_sacado>/<str:agencia_sacado>', PagarBoletoView.as_view()),
+    path('boletos/pagamento/<str:agencia_sacado>/<str:conta_sacado>', PagarBoletoView.as_view()),
     path('boletos/cancelamento/', CancelarBoletoView.as_view())
 ]

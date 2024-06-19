@@ -1,0 +1,2 @@
+class CobrancaExpirada(Exception):
+    pass
