@@ -4,10 +4,9 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from boleto.exceptions import BoletoPago, SaldoInsuficiente
 from boleto.serializers import (CriarBoletoInputSerializer, CriarBoletoOutputSerializer,
-                                ListarBoletosOutputSerializer, ListarBoletosInputSerializer,
-                                ConsultaBoletoPorIdInputSerializer)
+                                ListarBoletosInputSerializer, ConsultaBoletoPorIdInputSerializer,
+                                PagamentoBoletoOutputSerializer)
 from boleto.use_cases.cancelar_boleto_use_case import CancelarBoletoUseCase
 from boleto.use_cases.consulta_boleto_por_id_use_case import ConsultaBoletoPorIdUseCase
 from boleto.use_cases.gerar_boleto_use_case import GerarBoletoUseCase
@@ -43,7 +42,7 @@ class GerarBoletoView(APIView):
 
         output = CriarBoletoOutputSerializer(instance=boleto)
 
-        return Response(data=output.data, status=201)
+        return Response(data=output.data, status=status.HTTP_201_CREATED)
 
 
 class ListarBoletosView(APIView):
@@ -55,7 +54,7 @@ class ListarBoletosView(APIView):
     @swagger_auto_schema(
         query_serializer=ListarBoletosInputSerializer(),
         responses={
-            status.HTTP_201_CREATED: ListarBoletosOutputSerializer(),
+            status.HTTP_200_OK: CriarBoletoOutputSerializer(),
             status.HTTP_400_BAD_REQUEST: 'Bad request.'
         }
     )
@@ -65,16 +64,21 @@ class ListarBoletosView(APIView):
 
         id_conta = serializer.validated_data.get('id_conta')
         agencia = serializer.validated_data.get('agencia')
+        num_conta = serializer.validated_data.get('num_conta')
         status_boleto = serializer.validated_data.get('status')
         id_boleto = serializer.validated_data.get('id_boleto')
+        valor = serializer.validated_data.get('valor')
+        data_vencimento = serializer.validated_data.get('data_vencimento')
 
         boletos = self.listar_boletos_use_case.execute(id_conta=id_conta, agencia=agencia,
                                                        status=status_boleto,
-                                                       id_boleto=id_boleto)
+                                                       id_boleto=id_boleto, valor=valor,
+                                                       data_de_vencimento=data_vencimento,
+                                                       num_conta=num_conta)
 
-        output = ListarBoletosOutputSerializer(instance=boletos, many=True)
+        output = CriarBoletoOutputSerializer(instance=boletos, many=True)
 
-        return Response(data=output.data, status=200)
+        return Response(data=output.data, status=status.HTTP_200_OK)
 
 
 class PagarBoletoView(APIView):
@@ -84,28 +88,24 @@ class PagarBoletoView(APIView):
         self.pagar_boleto_use_case = PagarBoletoUseCase()
 
     @swagger_auto_schema(
-        query_serializer=ConsultaBoletoPorIdInputSerializer(),
+        request_body=ConsultaBoletoPorIdInputSerializer(),
         responses={
-            status.HTTP_201_CREATED: ListarBoletosOutputSerializer(),
+            status.HTTP_202_ACCEPTED: PagamentoBoletoOutputSerializer(),
             status.HTTP_400_BAD_REQUEST: 'Bad request.'
         }
     )
-    def patch(self, request: Request, num_conta_sacado: str, agencia_sacado: str):
-        serializer = ConsultaBoletoPorIdInputSerializer(data=request.query_params)
+    def patch(self, request: Request, conta_sacado: str, agencia_sacado: str):
+        serializer = ConsultaBoletoPorIdInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         id_boleto = serializer.validated_data['id_boleto']
 
-        try:
-            boleto = self.pagar_boleto_use_case.execute(id_boleto=id_boleto, num_conta_sacado=num_conta_sacado,
-                                                        agencia_sacado=agencia_sacado)
+        boleto = self.pagar_boleto_use_case.execute(id_boleto=id_boleto, conta_sacado=conta_sacado,
+                                                    agencia_sacado=agencia_sacado)
 
-        except (BoletoPago, SaldoInsuficiente) as exc:
-            return Response(status=400, data=exc.args[0])
+        output = PagamentoBoletoOutputSerializer(instance=boleto)
 
-        output = ListarBoletosOutputSerializer(instance=boleto)
-
-        return Response(data=output.data, status=200)
+        return Response(data=output.data, status=status.HTTP_202_ACCEPTED)
 
 
 class CancelarBoletoView(APIView):
@@ -117,7 +117,7 @@ class CancelarBoletoView(APIView):
     @swagger_auto_schema(
         query_serializer=ConsultaBoletoPorIdInputSerializer(),
         responses={
-            status.HTTP_201_CREATED: CriarBoletoOutputSerializer(),
+            status.HTTP_202_ACCEPTED: CriarBoletoOutputSerializer(),
             status.HTTP_400_BAD_REQUEST: 'Bad request.'
         }
     )
@@ -127,15 +127,11 @@ class CancelarBoletoView(APIView):
 
         id_boleto = serializer.validated_data['id_boleto']
 
-        try:
-            boleto = self.cancelar_boleto_use_case.execute(id_boleto=id_boleto)
-
-        except BoletoPago as exc:
-            return Response(status=400, data=exc.args[0])
+        boleto = self.cancelar_boleto_use_case.execute(id_boleto=id_boleto)
 
         output = CriarBoletoOutputSerializer(instance=boleto)
 
-        return Response(data=output.data, status=200)
+        return Response(data=output.data, status=status.HTTP_202_ACCEPTED)
 
 
 class ConsultaBoletoPorIdView(APIView):
@@ -147,7 +143,7 @@ class ConsultaBoletoPorIdView(APIView):
     @swagger_auto_schema(
         query_serializer=ConsultaBoletoPorIdInputSerializer(),
         responses={
-            status.HTTP_201_CREATED: CriarBoletoOutputSerializer(),
+            status.HTTP_200_OK: CriarBoletoOutputSerializer(),
             status.HTTP_400_BAD_REQUEST: 'Bad request.'
         }
     )
@@ -161,4 +157,4 @@ class ConsultaBoletoPorIdView(APIView):
 
         output = CriarBoletoOutputSerializer(instance=boleto)
 
-        return Response(data=output.data, status=200)
+        return Response(data=output.data, status=status.HTTP_200_OK)

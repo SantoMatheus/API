@@ -1,22 +1,33 @@
+import uuid
+from datetime import datetime
+from typing import Optional
+
+from django.db.models import Q
+
 from boleto.models import Boleto
-from conta.models import ContaCorrente
 
 
 class ListarBoletoUseCase:
 
-    def execute(self, agencia=None, id_conta=None, status=None, id_boleto=None):
-        parametros_conta = {}
+    def execute(self, agencia: Optional[str] = None, id_conta: Optional[uuid.UUID] = None,
+                num_conta: Optional[str] = None, status: Optional[str] = None,
+                id_boleto: Optional[uuid.UUID] = None, valor: Optional[float] = None,
+                data_de_vencimento: Optional[datetime] = None):
+        filtro = Q()
+
         if agencia:
-            parametros_conta['agencia'] = agencia
+            filtro &= Q(conta_corrente__agencia=agencia)
         if id_conta:
-            parametros_conta['id'] = id_conta
-        contas_correntes = ContaCorrente.objects.filter(**parametros_conta)
-
-        parametros_boleto = {}
+            filtro &= Q(id_conta=id_conta)
         if status:
-            parametros_boleto['status'] = status
+            filtro &= Q(status=status)
         if id_boleto:
-            parametros_boleto['id'] = id_boleto
-        boletos = Boleto.objects.filter(conta_corrente__in=contas_correntes, **parametros_boleto)
+            filtro &= Q(id_boleto=id_boleto)
+        if valor:
+            filtro &= Q(valor=valor)
+        if data_de_vencimento:
+            filtro &= Q(data_de_vencimento=data_de_vencimento)
+        if num_conta:
+            filtro &= Q(conta_corrente__num_conta=num_conta)
 
-        return boletos
+        return Boleto.objects.filter(filtro)

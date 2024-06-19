@@ -3,16 +3,17 @@ from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
-from drf_spectacular.types import OpenApiTypes
 
-from conta.exceptions.saldo_insuficiente import SaldoInsuficiente
-from conta.serializers import CriarContaSerializer, ContaCorrenteSerializer, ConsultarContaOutputSerializer, \
-    DepositoInputSerializer, SaqueInputSerializer, \
-    MulticontaInputSerializer, ConsultarContaInputSerializer
-from conta.use_cases.consultar_conta_use_case import ListarContaUseCase
+from conta.serializers import CriarContaInputSerializer, CriarContaCorrenteOutputSerializer, \
+    ConsultarContaOutputSerializer, DepositoInputSerializer, SaqueInputSerializer, MulticontaInputSerializer, \
+    ConsultarContaInputSerializer, TransferenciaInputSerializer, TransferenciaOutputSerializer, \
+    ListarTransferenciaInputSerializer, DepositoOutputSerializer, SaqueOutputSerializer
 from conta.use_cases.criar_conta_use_case import CriarContaUseCase
+from conta.use_cases.criar_transferencia_use_case import CriarTransferenciaUseCase
 from conta.use_cases.deposito_use_case import DepositoUseCase
+from conta.use_cases.excluir_conta_use_case import CancelarContaUseCase
+from conta.use_cases.listar_conta_use_case import ListarContaUseCase
+from conta.use_cases.listar_transferencia_use_case import ListarTransferenciaUseCase
 from conta.use_cases.multiconta_use_case import MulticontaUseCase
 from conta.use_cases.saque_use_case import SaqueUseCase
 
@@ -23,13 +24,13 @@ class CriarContaView(APIView):
         super().__init__(*args, **kwargs)
         self.criar_conta_use_case = CriarContaUseCase()
 
-    @extend_schema(
-        request=CriarContaSerializer(),
-        responses={status.HTTP_201_CREATED: ContaCorrenteSerializer(),
-            status.HTTP_400_BAD_REQUEST: 'Bad request.'},
+    @swagger_auto_schema(
+        request_body=CriarContaInputSerializer(),
+        responses={status.HTTP_201_CREATED: CriarContaCorrenteOutputSerializer(),
+                   status.HTTP_400_BAD_REQUEST: 'Bad request.'},
     )
     def post(self, request):
-        serializer = CriarContaSerializer(data=request.data)
+        serializer = CriarContaInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         nome = serializer.validated_data['nome']
@@ -37,7 +38,7 @@ class CriarContaView(APIView):
 
         conta = self.criar_conta_use_case.execute(nome=nome, cpf=cpf)
 
-        output = ContaCorrenteSerializer(instance=conta)
+        output = CriarContaCorrenteOutputSerializer(instance=conta)
         return Response(data=output.data, status=status.HTTP_201_CREATED)
 
 
@@ -47,9 +48,9 @@ class ListarContaView(APIView):
         super().__init__(*args, **kwargs)
         self.listar_conta_use_case = ListarContaUseCase()
 
-    @extend_schema(
-        request=CriarContaSerializer(),
-        responses={status.HTTP_201_CREATED: ContaCorrenteSerializer(),
+    @swagger_auto_schema(
+        query_serializer=ConsultarContaInputSerializer(),
+        responses={status.HTTP_200_OK: CriarContaCorrenteOutputSerializer(),
                    status.HTTP_400_BAD_REQUEST: 'Bad request.'},
     )
     def get(self, request: Request):
@@ -65,7 +66,7 @@ class ListarContaView(APIView):
                                                             id_conta=id_conta)
 
         output = ConsultarContaOutputSerializer(instance=conta_corrente, many=True)
-        return Response(data=output.data, status='200')
+        return Response(data=output.data, status=status.HTTP_200_OK)
 
 
 class DepositoView(APIView):
@@ -77,7 +78,7 @@ class DepositoView(APIView):
     @swagger_auto_schema(
         request_body=DepositoInputSerializer(),
         responses={
-            status.HTTP_201_CREATED: ConsultarContaOutputSerializer(),
+            status.HTTP_202_ACCEPTED: DepositoOutputSerializer(),
             status.HTTP_400_BAD_REQUEST: 'Bad request.'
         }
     )
@@ -87,14 +88,11 @@ class DepositoView(APIView):
 
         valor_deposito = serializer.validated_data['valor_deposito']
 
-        try:
-            conta_atualizada = self.deposito_use_case.execute(agencia=agencia, num_conta=num_conta,
-                                                              valor_deposito=valor_deposito)
-        except SaldoInsuficiente as exc:
-            return Response(data=exc.args[0], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        conta_atualizada = self.deposito_use_case.execute(agencia=agencia, num_conta=num_conta,
+                                                          valor_deposito=valor_deposito)
 
-        output = ConsultarContaOutputSerializer(instance=conta_atualizada)
-        return Response(data=output.data, status='202')
+        output = DepositoOutputSerializer(instance=conta_atualizada)
+        return Response(data=output.data, status=status.HTTP_202_ACCEPTED)
 
 
 class SaqueView(APIView):
@@ -106,7 +104,7 @@ class SaqueView(APIView):
     @swagger_auto_schema(
         request_body=SaqueInputSerializer(),
         responses={
-            status.HTTP_201_CREATED: ConsultarContaOutputSerializer(),
+            status.HTTP_202_ACCEPTED: SaqueOutputSerializer(),
             status.HTTP_400_BAD_REQUEST: 'Bad request.'
         }
     )
@@ -116,14 +114,11 @@ class SaqueView(APIView):
 
         valor_saque = serializer.validated_data['valor_saque']
 
-        try:
-            conta_atualizada = self.saque_use_case.execute(agencia=agencia, num_conta=num_conta,
-                                                           valor_saque=valor_saque)
-        except SaldoInsuficiente as exc:
-            return Response(data=exc.args[0], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        conta_atualizada = self.saque_use_case.execute(agencia=agencia, num_conta=num_conta,
+                                                       valor_saque=valor_saque)
 
-        output = ConsultarContaOutputSerializer(instance=conta_atualizada)
-        return Response(data=output.data, status='202')
+        output = SaqueOutputSerializer(instance=conta_atualizada)
+        return Response(data=output.data, status=status.HTTP_202_ACCEPTED)
 
 
 class MulticontaView(APIView):
@@ -149,4 +144,95 @@ class MulticontaView(APIView):
         conta_corrente = self.multiconta_use_case.execute(agencia=agencia, num_conta=numero_conta_origem)
 
         output = ConsultarContaOutputSerializer(instance=conta_corrente)
-        return Response(data=output.data, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(data=output.data, status=status.HTTP_201_CREATED)
+
+
+class TransferenciaView(APIView):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.criar_transferencia_use_case = CriarTransferenciaUseCase()
+
+    @swagger_auto_schema(
+        request_body=TransferenciaInputSerializer(),
+        responses={
+            status.HTTP_202_ACCEPTED: TransferenciaOutputSerializer(),
+            status.HTTP_400_BAD_REQUEST: 'Bad request.'
+        }
+    )
+    def post(self, request: Request, agencia: str, num_conta: str):
+        serializer = TransferenciaInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        agencia_destino = serializer.validated_data['agencia_destino']
+        num_conta_destino = serializer.validated_data['num_conta_destino']
+        valor = serializer.validated_data['valor']
+
+        transferencia = self.criar_transferencia_use_case.execute(agencia_origem=agencia, num_conta_origem=num_conta,
+                                                                  agencia_destino=agencia_destino,
+                                                                  num_conta_destino=num_conta_destino, valor=valor)
+        output = TransferenciaOutputSerializer(instance=transferencia)
+
+        return Response(data=output.data, status=status.HTTP_202_ACCEPTED)
+
+
+class ListarTransferenciaView(APIView):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.consultar_transferencia_use_case = ListarTransferenciaUseCase()
+
+    @swagger_auto_schema(
+        query_serializer=ListarTransferenciaInputSerializer(),
+        responses={
+            status.HTTP_200_OK: TransferenciaOutputSerializer(),
+            status.HTTP_400_BAD_REQUEST: 'Bad request.'
+        }
+    )
+    def get(self, request: Request):
+        serializer = ListarTransferenciaInputSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+
+        agencia_origem = serializer.validated_data['agencia_origem']
+        num_conta_origem = serializer.validated_data['num_conta_origem']
+        agencia_destino = serializer.validated_data['agencia_destino']
+        num_conta_destino = serializer.validated_data['num_conta_destino']
+        id_transferencia = serializer.validated_data['id_transferencia']
+        valor = serializer.validated_data['valor']
+
+        transferencia = self.consultar_transferencia_use_case.execute(agencia_origem=agencia_origem,
+                                                                      num_conta_origem=num_conta_origem,
+                                                                      agencia_destino=agencia_destino,
+                                                                      num_conta_destino=num_conta_destino,
+                                                                      id_transferencia=id_transferencia, valor=valor)
+
+        output = TransferenciaOutputSerializer(instance=transferencia, many=True)
+
+        return Response(data=output.data, status=status.HTTP_200_OK)
+
+
+class CancelarContaView(APIView):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.cancelar_conta_use_case = CancelarContaUseCase()
+
+    @swagger_auto_schema(
+        query_serializer=ConsultarContaInputSerializer(),
+        responses={
+            status.HTTP_202_ACCEPTED: ConsultarContaOutputSerializer(),
+            status.HTTP_400_BAD_REQUEST: 'Bad request.'
+        }
+    )
+    def delete(self, request: Request):
+        serializer = ConsultarContaInputSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+
+        agencia = serializer.validated_data.get('agencia', None)
+        num_conta = serializer.validated_data.get('num_conta', None)
+        cpf = serializer.validated_data.get('cpf', None)
+        id_conta = serializer.validated_data.get('id_conta', None)
+
+        conta = self.cancelar_conta_use_case.execute(agencia=agencia, num_conta=num_conta, cpf=cpf, id_conta=id_conta)
+
+        output = ConsultarContaOutputSerializer(instance=conta)
+
+        return Response(data=output.data, status=status.HTTP_202_ACCEPTED)
