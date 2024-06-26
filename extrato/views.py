@@ -4,31 +4,29 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from extrato.serializers import ExtratoOutputSerializer, ExtratoInputSerializer
+from extrato.serializers import ExtratoInputSerializer, ExtratoOutputSerializer
 from extrato.use_cases.buscar_eventos_use_case import BuscarEventosUseCase
 
 
 class BuscarEventosView(APIView):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.buscar_eventos_use_case = BuscarEventosUseCase()
 
     @swagger_auto_schema(
-        request_body=ExtratoInputSerializer(),
+        query_serializer=ExtratoInputSerializer(),
         responses={
             status.HTTP_200_OK: ExtratoOutputSerializer(),
             status.HTTP_400_BAD_REQUEST: 'Bad request.'
         }
     )
     def get(self, request: Request):
-        serializer = ExtratoInputSerializer(data=request.data)
+        serializer = ExtratoInputSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
 
-        agencia = serializer.validated_data['agencia']
-        num_conta = serializer.validated_data['num_conta']
+        agencia = serializer.validated_data.get('agencia')
+        num_conta = serializer.validated_data.get('num_conta')
 
         eventos = self.buscar_eventos_use_case.execute(agencia=agencia, conta_corrente=num_conta)
 
-        output = ExtratoOutputSerializer(instance=eventos, many=True)
-
-        return Response(data=output.data, status=status.HTTP_200_OK)
+        return Response(data={'eventos': eventos}, status=status.HTTP_200_OK)

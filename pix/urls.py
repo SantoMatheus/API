@@ -1,7 +1,8 @@
 from django.urls import path
 
 from pix.views import CriarChavePixView, ConsultarChavesPixPorContaView, ConsultarChavePixPeloHashView, \
-    ExcluirChavePixView, CriarCobrancaPixView, PagarPixView, BuscarCobrancaPixView
+    ExcluirChavePixView, CriarCobrancaPixView, PagarPixView, BuscarCobrancaPixView, BuscarPagamentoPixView, \
+    BuscarRecebimentoPixView, BuscarDevolucaoPixPelaOrigemView, BuscarDevolucaoPixPeloDestinoView
 
 app_name = 'pix'
 
@@ -13,4 +14,8 @@ urlpatterns = [
     path('pix/buscar_cobranca_pix/', BuscarCobrancaPixView.as_view()),
     path('pix/criar_cobranca_pix/', CriarCobrancaPixView.as_view()),
     path('pix/pagamento_pix/', PagarPixView.as_view()),
+    path('pix/buscar_pagamento_pix/', BuscarPagamentoPixView.as_view()),
+    path('pix/buscar_recebimento_pix/', BuscarRecebimentoPixView.as_view()),
+    path('pix/buscar_devolucao_pix_conta_origem/', BuscarDevolucaoPixPelaOrigemView.as_view()),
+    path('pix/buscar_devolucao_pix_conta_destino/', BuscarDevolucaoPixPeloDestinoView.as_view()),
     ]

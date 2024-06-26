@@ -1,9 +1,9 @@
 from rest_framework import serializers
 
 from boleto.serializers import PagamentoBoletoOutputSerializer
-from conta.serializers import DepositoOutputSerializer
-from pix.serializers import PagamentoPixOutputSerializer
-from transferencia.serializers import TransferenciaOutputSerializer
+from conta.models import ContaCorrente
+from conta.serializers import DepositoOutputSerializer, TransferenciaOutputSerializer, SaqueOutputSerializer
+from pix.serializers import PagamentoPixOutputSerializer, DevolucaoPixOutputSerializer
 
 
 class ExtratoInputSerializer(serializers.Serializer):
@@ -12,9 +12,13 @@ class ExtratoInputSerializer(serializers.Serializer):
 
 
 class ExtratoOutputSerializer(serializers.ModelSerializer):
-    boleto = PagamentoBoletoOutputSerializer
-    pix = PagamentoPixOutputSerializer
-    devolucao_pix = PagamentoPixOutputSerializer
-    saque = DepositoOutputSerializer
-    deposito = DepositoOutputSerializer
-    transferencia = TransferenciaOutputSerializer
+    pagamento_boleto = PagamentoBoletoOutputSerializer()
+    pagamento_pix = PagamentoPixOutputSerializer()
+    devolucao_pix = DevolucaoPixOutputSerializer()
+    saque = SaqueOutputSerializer()
+    deposito = DepositoOutputSerializer()
+    transferencia = TransferenciaOutputSerializer()
+
+    class Meta:
+        model = ContaCorrente
+        fields = '__all__'

@@ -39,14 +39,21 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'django_cron',
+
+
     'conta',
     'boleto',
     'pix',
     'extrato',
-    'tasks',
+
     'drf_spectacular',
     'drf_yasg',
 
+]
+
+CRON_CLASSES = [
+    'config.cron.AtualizaStatusParaVencidoCronJob',
 ]
 
 MIDDLEWARE = [

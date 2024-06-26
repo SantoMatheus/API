@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from common_modules.definir_vencimento_cobranca_use_case import DefinirVencimentoCobrancaUseCase
 from pix.models import TransferenciaPix
 from pix.use_cases.consultar_chave_pix_por_hash_use_case import ConsultarChavePixPorHashUseCase
@@ -9,7 +11,7 @@ class CriarTransferenciaPixUseCase:
         self.consultar_chave_pix_por_hash = ConsultarChavePixPorHashUseCase()
         self.definir_vencimento_use_case = DefinirVencimentoCobrancaUseCase()
 
-    def execute(self, chave_pix_origem: str, chave_pix_destino: str, valor: float, validade: int):
+    def execute(self, chave_pix_origem: str, chave_pix_destino: str, valor: float, validade: str):
         # Busca os dados da conta de onde a transferência irá partir
         chave_pix_origem = self.consultar_chave_pix_por_hash.execute(valor_chave_pix=chave_pix_origem).conta_corrente
         # Busca a conta para onde a transferência será enviada

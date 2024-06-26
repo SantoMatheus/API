@@ -20,7 +20,7 @@ class ListarTransferenciaUseCase:
         if agencia_destino:
             consulta &= Q(conta_destino__agencia=agencia_destino)
         if num_conta_destino:
-            consulta &= Q(conta_destino__Num_conta=num_conta_destino)
+            consulta &= Q(conta_destino__num_conta=num_conta_destino)
         if id_transferencia:
             consulta &= Q(id=id_transferencia)
         if valor:

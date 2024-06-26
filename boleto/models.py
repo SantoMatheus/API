@@ -16,6 +16,7 @@ class StatusBoletoChoice(DjangoChoices):
 
 class Boleto(TimeStampedModel):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
     conta_corrente = models.ForeignKey(ContaCorrente, db_column='CONTA_CORRENT_ID', on_delete=models.CASCADE)
     valor = models.FloatField()
     data_vencimento = models.DateField(default=DefinirVencimentoCobrancaUseCase.execute)
@@ -25,6 +26,5 @@ class Boleto(TimeStampedModel):
 class PagamentoBoleto(TimeStampedModel):
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True)
     boleto = models.ForeignKey(Boleto, on_delete=models.CASCADE, related_name='boleto_cobranca')
+    criado_em = models.DateTimeField(auto_now_add=True)
     conta_sacado = models.ForeignKey(ContaCorrente, on_delete=models.CASCADE, related_name='conta_sacado')
-
-
