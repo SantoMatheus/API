@@ -8,12 +8,14 @@ from pix.exceptions.valor_chave_requerido import ValorChaveRequerido
 from pix.serializers import CriarChavePixInputSerializer, CriarChavePixOutputSerializer, \
     ConsultarChavePixPorContaInputSerializer, ConsultarChavePixPeloHashInputSerializer, \
     CriarCobrancaPixOutputSerializer, CriarCobrancaPixInputSerializer, \
-    PagarPixInputSerializer
+    PagarPixInputSerializer, PagamentoPixOutputSerializer, DevolucaoPixInputSerializer, DevolucaoPixOutputSerializer
 from pix.use_cases.buscar_cobranca_use_case import BuscarCobrancaPixUseCase
+from pix.use_cases.buscar_pagamento_pix_use_case import BuscarPagamentoPixUseCase
 from pix.use_cases.consultar_chave_pix_por_conta_use_case import ConsultarChavePixPorContaUseCase
 from pix.use_cases.consultar_chave_pix_por_hash_use_case import ConsultarChavePixPorHashUseCase
 from pix.use_cases.criar_chave_pix_use_case import CriarChavePixUseCase
 from pix.use_cases.criar_cobranca_pix_use_case import CriarTransferenciaPixUseCase
+from pix.use_cases.devolver_pix_use_case import DevolverPixUseCase
 from pix.use_cases.excluir_chave_pix_use_case import ExcluirChavePixUseCase
 from pix.use_cases.pagar_pix_use_case import PagarPixUseCase
 
@@ -64,8 +66,8 @@ class ConsultarChavesPixPorContaView(APIView):
         serializer = ConsultarChavePixPorContaInputSerializer(data=request.query_params)
         serializer.is_valid(raise_exception=True)
 
-        agencia = serializer.validated_data['agencia']
-        num_conta = serializer.validated_data['num_conta']
+        agencia = serializer.validated_data.get('agencia')
+        num_conta = serializer.validated_data.get('num_conta')
 
         chave_pix = self.consultar_chave_pix_por_conta_use_case.execute(agencia=agencia, num_conta=num_conta)
 
@@ -179,6 +181,31 @@ class PagarPixView(APIView):
         return Response(data=output.data, status=status.HTTP_202_ACCEPTED)
 
 
+class DevolucaoPixView(APIView):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.devolver_pix_use_case = DevolverPixUseCase()
+
+    @swagger_auto_schema(
+        request_body=PagarPixInputSerializer(),
+        responses={
+            status.HTTP_202_ACCEPTED: CriarCobrancaPixOutputSerializer(),
+            status.HTTP_400_BAD_REQUEST: 'Bad request.'
+        }
+    )
+    def patch(self, request: Request):
+        serializer = DevolucaoPixInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        id_pagamento = serializer.validated_data['id_pagamento']
+        valor_a_devolver = serializer.validated_data['valor_a_devolver']
+
+        devolucao = self.devolver_pix_use_case.execute(id_pagamento=id_pagamento, valor_a_devolver=valor_a_devolver)
+
+        output = DevolucaoPixOutputSerializer(instance=devolucao)
+        return Response(data=output.data, status=status.HTTP_202_ACCEPTED)
+
+
 class BuscarCobrancaPixView(APIView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -204,5 +231,107 @@ class BuscarCobrancaPixView(APIView):
         return Response(data=output.data, status=status.HTTP_200_OK)
 
 
+class BuscarPagamentoPixView(APIView):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.buscar_pagamento_pix_use_case = BuscarPagamentoPixUseCase()
+
+    @swagger_auto_schema(
+        query_serializer=ConsultarChavePixPorContaInputSerializer(),
+        responses={
+            status.HTTP_200_OK: PagamentoPixOutputSerializer(),
+            status.HTTP_400_BAD_REQUEST: 'Bad request.'
+        }
+    )
+    def get(self, request: Request):
+        serializer = ConsultarChavePixPorContaInputSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+
+        agencia = serializer.validated_data.get('agencia')
+        num_conta = serializer.validated_data.get('num_conta')
+
+        pagamento = self.buscar_pagamento_pix_use_case.execute(agencia_origem=agencia, num_conta_origem=num_conta)
+
+        output = PagamentoPixOutputSerializer(instance=pagamento, many=True)
+
+        return Response(data=output.data, status=status.HTTP_200_OK)
 
 
+class BuscarRecebimentoPixView(APIView):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.buscar_recebimento_pix_use_case = BuscarPagamentoPixUseCase()
+
+    @swagger_auto_schema(
+        query_serializer=ConsultarChavePixPorContaInputSerializer(),
+        responses={
+            status.HTTP_200_OK: PagamentoPixOutputSerializer(),
+            status.HTTP_400_BAD_REQUEST: 'Bad request.'
+        }
+    )
+    def get(self, request: Request):
+        serializer = ConsultarChavePixPorContaInputSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+
+        agencia = serializer.validated_data['agencia']
+        num_conta = serializer.validated_data['num_conta']
+
+        pagamento = self.buscar_recebimento_pix_use_case.execute(agencia_destino=agencia, num_conta_destino=num_conta)
+
+        output = PagamentoPixOutputSerializer(instance=pagamento, many=True)
+
+        return Response(data=output.data, status=status.HTTP_200_OK)
+
+
+class BuscarDevolucaoPixPelaOrigemView(APIView):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.buscar_devolucao_pix_pela_origem_use_case = BuscarRecebivelPixUseCase()
+
+    @swagger_auto_schema(
+        query_serializer=ConsultarChavePixPorContaInputSerializer(),
+        responses={
+            status.HTTP_200_OK: DevolucaoPixOutputSerializer(),
+            status.HTTP_400_BAD_REQUEST: 'Bad request.'
+        }
+    )
+    def get(self, request: Request):
+        serializer = ConsultarChavePixPorContaInputSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+
+        agencia = serializer.validated_data.get('agencia')
+        num_conta = serializer.validated_data.get('num_conta')
+
+        pagamento = self.buscar_devolucao_pix_pela_origem_use_case.execute(agencia_origem=agencia,
+                                                                           num_conta_origem=num_conta)
+
+        output = DevolucaoPixOutputSerializer(instance=pagamento, many=True)
+
+        return Response(data=output.data, status=status.HTTP_200_OK)
+
+
+class BuscarDevolucaoPixPeloDestinoView(APIView):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.buscar_devolucao_pix_pelo_destino_use_case = BuscarRecebivelPixUseCase()
+
+    @swagger_auto_schema(
+        query_serializer=ConsultarChavePixPorContaInputSerializer(),
+        responses={
+            status.HTTP_200_OK: DevolucaoPixOutputSerializer(),
+            status.HTTP_400_BAD_REQUEST: 'Bad request.'
+        }
+    )
+    def get(self, request: Request):
+        serializer = ConsultarChavePixPorContaInputSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+
+        agencia = serializer.validated_data.get('agencia')
+        num_conta = serializer.validated_data.get('num_conta')
+
+        pagamento = self.buscar_devolucao_pix_pelo_destino_use_case.execute(agencia_destino=agencia,
+                                                                            num_conta_destino=num_conta)
+
+        output = DevolucaoPixOutputSerializer(instance=pagamento, many=True)
+
+        return Response(data=output.data, status=status.HTTP_200_OK)

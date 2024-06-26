@@ -1,4 +1,4 @@
-
+from django_cron import Schedule, CronJobBase
 from django.utils import timezone
 
 from boleto.models import Boleto
@@ -20,3 +20,14 @@ def atualiza_status_para_vencido():
     for boleto in cobrancas_boleto_expiradas:
         boleto.status = 'vencido'
         boleto.save()
+
+
+class AtualizaStatusParaVencidoCronJob(CronJobBase):
+    RUN_AT_TIMES = ['23:59:59']
+
+    schedule = Schedule(run_at_times=RUN_AT_TIMES)
+    code = 'config.atualiza_status_para_vencido'
+
+    def execute(self):
+        # função agendada
+        atualiza_status_para_vencido()

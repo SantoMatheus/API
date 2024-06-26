@@ -43,5 +43,5 @@ class PagarPixUseCase:
         transferencia_pix.save()
 
         # Cria o objeto pagamento
-        return PagamentoPix.objects.create(cobranca_pix=id_cobranca)
+        return PagamentoPix.objects.create(cobranca_pix=transferencia_pix)
 

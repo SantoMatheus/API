@@ -12,6 +12,7 @@ class StatusChoice(DjangoChoices):
 
 class ContaCorrente(TimeStampedModel):
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
     nome = models.CharField(max_length=55)
     cpf = models.CharField(max_length=11)
     saldo = models.FloatField(db_column='SALDO', default=0)
@@ -22,18 +23,21 @@ class ContaCorrente(TimeStampedModel):
 
 class Saque(TimeStampedModel):
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
     conta_corrente = models.ForeignKey(ContaCorrente, on_delete=models.CASCADE, related_name='conta_corrente_saque')
     valor = models.FloatField()
 
 
 class Deposito(TimeStampedModel):
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
     conta_corrente = models.ForeignKey(ContaCorrente, on_delete=models.CASCADE, related_name='conta_corrente_deposito')
     valor = models.FloatField()
 
 
 class Transferencia(TimeStampedModel):
     id = models.UUIDField(default=uuid.uuid4, unique=True, primary_key=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
     conta_origem = models.ForeignKey(ContaCorrente, on_delete=models.CASCADE,
                                      related_name='transferencias_origem')
     conta_destino = models.ForeignKey(ContaCorrente, on_delete=models.CASCADE,

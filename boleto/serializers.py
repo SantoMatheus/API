@@ -23,7 +23,7 @@ class ListarBoletosInputSerializer(serializers.Serializer):
     status = serializers.CharField(required=False)
     id_boleto = serializers.UUIDField(required=False)
     valor = serializers.FloatField(required=False)
-    data_vencimento = serializers.DateTimeField(required=False)
+    data_vencimento = serializers.DateField(required=False)
 
 
 class ConsultaBoletoPorIdInputSerializer(serializers.Serializer):
@@ -37,3 +37,12 @@ class PagamentoBoletoOutputSerializer(serializers.ModelSerializer):
         model = PagamentoBoleto
         fields = '__all__'
 
+
+class BuscarPagamentoBoletoInputSerializer(serializers.Serializer):
+    agencia_sacado = serializers.CharField(max_length=4, required=False)
+    num_conta_sacado = serializers.CharField(max_length=10, required=False)
+
+
+class BuscarRecebimentoBoletoInputSerializer(serializers.Serializer):
+    agencia_cedente = serializers.CharField(max_length=4, required=False)
+    num_conta_cedente = serializers.CharField(max_length=10, required=False)

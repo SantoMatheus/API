@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Optional
 
 from django.db.models import Q
+from rest_framework.exceptions import ValidationError
 
 from boleto.models import Boleto
 
@@ -13,8 +14,8 @@ class ListarBoletoUseCase:
                 num_conta: Optional[str] = None, status: Optional[str] = None,
                 id_boleto: Optional[uuid.UUID] = None, valor: Optional[float] = None,
                 data_de_vencimento: Optional[datetime] = None):
-        filtro = Q()
 
+        filtro = Q()
         if agencia:
             filtro &= Q(conta_corrente__agencia=agencia)
         if id_conta:

@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from django.apps import AppConfig
 
-# from tasks.atualiza_para_vencido_task import atualiza_status_para_vencido
+# from cron.atualiza_para_vencido_task import atualiza_status_para_vencido
 
 
 class BoletoConfig(AppConfig):

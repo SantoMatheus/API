@@ -6,7 +6,10 @@ from rest_framework.views import APIView
 
 from boleto.serializers import (CriarBoletoInputSerializer, CriarBoletoOutputSerializer,
                                 ListarBoletosInputSerializer, ConsultaBoletoPorIdInputSerializer,
-                                PagamentoBoletoOutputSerializer)
+                                PagamentoBoletoOutputSerializer, BuscarPagamentoBoletoInputSerializer,
+                                BuscarRecebimentoBoletoInputSerializer)
+from boleto.use_cases.buscar_pagamento_boleto_use_case import BuscarPagamentoBoletoUseCase
+from boleto.use_cases.buscar_recebimento_boleto_use_case import BuscarRecebimentoBoletoUseCase
 from boleto.use_cases.cancelar_boleto_use_case import CancelarBoletoUseCase
 from boleto.use_cases.consulta_boleto_por_id_use_case import ConsultaBoletoPorIdUseCase
 from boleto.use_cases.gerar_boleto_use_case import GerarBoletoUseCase
@@ -31,11 +34,10 @@ class GerarBoletoView(APIView):
         serializer = CriarBoletoInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        body = serializer.validated_data
-        agencia = body['agencia']
-        conta_corrente = body['conta_corrente']
-        data_vencimento = body['data_vencimento']
-        valor = body['valor']
+        agencia = serializer.validated_data['agencia']
+        conta_corrente = serializer.validated_data['conta_corrente']
+        data_vencimento = serializer.validated_data['data_vencimento']
+        valor = serializer.validated_data['valor']
 
         boleto = self.gerar_boleto_use_case.execute(agencia=agencia, num_conta=conta_corrente,
                                                     data_vencimento=data_vencimento, valor=valor)
@@ -157,4 +159,56 @@ class ConsultaBoletoPorIdView(APIView):
 
         output = CriarBoletoOutputSerializer(instance=boleto)
 
+        return Response(data=output.data, status=status.HTTP_200_OK)
+
+
+class BuscarRecebimentoBoletoView(APIView):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.buscar_recebimento_boleto_use_case = BuscarRecebimentoBoletoUseCase()
+
+    @swagger_auto_schema(
+        query_serializer=BuscarRecebimentoBoletoInputSerializer(),
+        responses={
+            status.HTTP_200_OK: PagamentoBoletoOutputSerializer(),
+            status.HTTP_400_BAD_REQUEST: 'Bad request.'
+        }
+    )
+    def get(self, request: Request):
+        serializer = BuscarRecebimentoBoletoInputSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+
+        agencia_cedente = serializer.validated_data.get('agencia_cedente')
+        num_conta_cedente = serializer.validated_data.get('num_conta_cedente')
+
+        recebimento_boleto = self.buscar_recebimento_boleto_use_case.execute(agencia_cedente=agencia_cedente,
+                                                                             num_conta_cedente=num_conta_cedente)
+
+        output = PagamentoBoletoOutputSerializer(instance=recebimento_boleto, many=True)
+        return Response(data=output.data, status=status.HTTP_200_OK)
+
+
+class BuscarPagamentoBoletoView(APIView):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.buscar_pagamento_boleto_use_case = BuscarPagamentoBoletoUseCase()
+
+    @swagger_auto_schema(
+        query_serializer=BuscarPagamentoBoletoInputSerializer(),
+        responses={
+            status.HTTP_200_OK: PagamentoBoletoOutputSerializer(),
+            status.HTTP_400_BAD_REQUEST: 'Bad request.'
+        }
+    )
+    def get(self, request: Request):
+        serializer = BuscarPagamentoBoletoInputSerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+
+        agencia_sacado = serializer.validated_data.get('agencia_sacado')
+        num_conta_sacado = serializer.validated_data.get('num_conta_sacado')
+
+        recebimento_boleto = self.buscar_pagamento_boleto_use_case.execute(agencia_sacado=agencia_sacado,
+                                                                           num_conta_sacado=num_conta_sacado)
+
+        output = PagamentoBoletoOutputSerializer(instance=recebimento_boleto, many=True)
         return Response(data=output.data, status=status.HTTP_200_OK)

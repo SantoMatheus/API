@@ -1,8 +1,7 @@
 from rest_framework import serializers
 
 from conta.models import ContaCorrente
-from conta.serializers import ConsultarContaOutputSerializer
-from pix.models import TipoChavePixChoice, ChavePix, TransferenciaPix, PagamentoPix
+from pix.models import TipoChavePixChoice, ChavePix, TransferenciaPix, PagamentoPix, DevolucaoPix
 
 
 class DadosContaCorrenteOutputSerializer(serializers.ModelSerializer):
@@ -37,7 +36,7 @@ class CriarCobrancaPixInputSerializer(serializers.Serializer):
     chave_pix_origem = serializers.CharField(max_length=150, min_length=11)
     chave_pix_destino = serializers.CharField(max_length=150, min_length=11)
     valor_transferencia = serializers.FloatField()
-    validade = serializers.IntegerField()
+    validade = serializers.DateField()
 
 
 class CriarCobrancaPixOutputSerializer(serializers.ModelSerializer):
@@ -53,8 +52,22 @@ class PagarPixInputSerializer(serializers.Serializer):
 
 
 class PagamentoPixOutputSerializer(serializers.ModelSerializer):
-    cobranca_pix = CriarCobrancaPixOutputSerializer
+    cobranca_pix = CriarCobrancaPixOutputSerializer()
 
     class Meta:
         model = PagamentoPix
-        field = '__all__'
+        fields = '__all__'
+
+
+class DevolucaoPixInputSerializer(serializers.Serializer):
+    id_pagamento = serializers.CharField(max_length=35)
+    valor_a_devolver = serializers.FloatField()
+
+
+class DevolucaoPixOutputSerializer(serializers.ModelSerializer):
+    pagamento_pix = PagamentoPixOutputSerializer()
+
+    class Meta:
+        model = DevolucaoPix
+        fields = '__all__'
+
